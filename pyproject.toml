@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "djcart"
+version = "0.1.0"
+description = "Simple django cart manager for your django projects."
+authors = ["Tobi DEGNON <tobidegnon@protonmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+Django = "^4.0.2"
+cart = "^1.2.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.0.1"
+pytest-django = "^4.5.2"
+mypy = "^0.931"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -1,25 +1,19 @@
 import itertools
 from dataclasses import dataclass, field, asdict
 from decimal import Decimal
-from typing import Union, List, Type, Protocol, runtime_checkable
+from typing import Union, List, Type
 
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpRequest
 
 from . import models
 from . import settings
+from .typing import Variant
 from .utils import get_module, get_product_model
 
 __all__ = ("Cart", "CartItem", "get_cart_manager_class")
 
-Variant = str | int | dict | set | "IsDataclass"
-
 Product = get_product_model()
-
-
-@runtime_checkable
-class IsDataclass(Protocol):
-    __dataclass_fields__: dict
 
 
 @dataclass(slots=True)
@@ -46,7 +40,7 @@ class Cart:
 
     def __post_init__(self):
         self._persist_to_db = (
-            settings.PERSIST_CART_TO_DB and self.request.user.is_authenticated
+                settings.PERSIST_CART_TO_DB and self.request.user.is_authenticated
         )
         if self._persist_to_db:
             obj, _ = models.Cart.objects.get_or_create(
@@ -101,6 +95,16 @@ class Cart:
         The list of associated products.
         """
         return Product.objects.filter(pk__in={item.product_pk for item in self._items})
+
+    def find(self) -> list[CartItem]:
+        """
+        Returns cart items base on the product and or variant
+        """
+
+    def find_first(self) -> CartItem | None:
+        """
+        Does the same thing as find but returns the first element or None
+        """
 
     def add(
         self,

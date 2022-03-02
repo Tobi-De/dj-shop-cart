@@ -24,8 +24,6 @@
 - order are leave to the user
 - payment processing is up to the user
 
-
-
 ```python
 
 
@@ -33,9 +31,8 @@
 
 CART_SESSIONS_ID = "CART-ID"
 
-
 # views
-from djcart import Cart
+from example.cart import Cart
 from shop.products.models import Product
 
 
@@ -43,7 +40,7 @@ def add_to_cart(request, product_id):
     product = get_objects_or_404(Product.objects.all, pk=product_id)
     ...
     cart = Cart(request)
-    cart.add(product=product, quantity=quantity, price=product.price) 
+    cart.add(product=product, quantity=quantity, price=product.price)
     ...
 
 ```

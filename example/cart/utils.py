@@ -1,12 +1,11 @@
 from importlib import import_module
-from typing import TypeVar
+from typing import cast
 
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 
 from . import settings
-
-DjangoModelType = TypeVar("DjangoModelType", bound=models.Model)
+from .typing import DjangoModelType
 
 
 def get_module(path: str):
@@ -23,5 +22,4 @@ def get_product_model() -> DjangoModelType:
         raise ImproperlyConfigured(
             "The `CART_PRODUCT_MODEL` settings must point to a django model."
         )
-    klass: DjangoModelType
-    return klass
+    return cast(DjangoModelType, klass)

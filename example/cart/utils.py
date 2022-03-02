@@ -5,7 +5,12 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 
 from . import settings
-from .typing import DjangoModelType
+from .typing import DjangoModelType, Variant
+
+
+def check_variant_type(variant: Variant) -> None:
+    if not isinstance(variant, Variant):
+        raise ValueError(f"{variant} does not have an allowed type")
 
 
 def get_module(path: str):

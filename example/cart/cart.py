@@ -10,7 +10,7 @@ from django.http import HttpRequest
 from . import settings
 from .storages import DBStorage, SessionStorage
 from .typing import Variant, Storage
-from .utils import get_module, get_product_model
+from .utils import get_module, get_product_model, check_variant_type
 
 __all__ = ("Cart", "CartItem", "get_cart_manager_class")
 
@@ -43,7 +43,7 @@ class Cart:
         self.storage = (
             DBStorage(self.request)
             if settings.PERSIST_CART_TO_DB and self.request.user.is_authenticated
-            else SessionStorage(self.storage)
+            else SessionStorage(self.request)
         )
         self._items = [CartItem(**item) for item in self.storage.load()]
 
@@ -121,9 +121,7 @@ class Cart:
         :return: An instance of the item added
         """
         if variant:
-            assert isinstance(
-                variant, Variant
-            ), f"{variant} does not have an allowed type"
+            check_variant_type(variant)
         price = Decimal(str(price))
         item = self.find_one(product=product, variant=variant, price=price)
         if not item:
@@ -156,6 +154,8 @@ class Cart:
         :param variant: Variant details of the product
         :return: The removed item with updated quantity if it exists
         """
+        if variant:
+            check_variant_type(variant)
         item = self.find_one(product=product, variant=variant)
         self.before_remove(item=item)
         if not item:

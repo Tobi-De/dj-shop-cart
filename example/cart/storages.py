@@ -29,7 +29,10 @@ class DBStorage:
     request: HttpRequest
 
     def load(self) -> List[dict]:
-        Cart.objects.get_or_create(customer=self.request.user, defaults={"items": []})
+        cart = Cart.objects.get_or_create(
+            customer=self.request.user, defaults={"items": []}
+        )
+        return cart.items
 
     def save(self, items: List[dict]) -> None:
         Cart.objects.update_or_create(

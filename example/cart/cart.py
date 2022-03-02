@@ -1,14 +1,15 @@
 import itertools
 from dataclasses import dataclass, field, asdict
 from decimal import Decimal
-from typing import Union, List, Type
+from typing import Union, List, Type, Optional
 
 from django.core.exceptions import ImproperlyConfigured
+from django.db.models import QuerySet
 from django.http import HttpRequest
 
-from . import models
 from . import settings
-from .typing import Variant
+from .storages import DBStorage, SessionStorage
+from .typing import Variant, Storage
 from .utils import get_module, get_product_model
 
 __all__ = ("Cart", "CartItem", "get_cart_manager_class")
@@ -21,7 +22,7 @@ class CartItem:
     product_pk: str
     price: Decimal
     quantity: int = field(compare=False)
-    variant: None | Variant = None
+    variant: Variant | None = None
 
     @property
     def product(self) -> Product:
@@ -35,21 +36,16 @@ class CartItem:
 @dataclass
 class Cart:
     request: HttpRequest
+    storage: Optional[Storage] = None
     _items: List[CartItem] = field(default_factory=list)
-    _persist_to_db: bool = False
 
     def __post_init__(self):
-        self._persist_to_db = (
-                settings.PERSIST_CART_TO_DB and self.request.user.is_authenticated
+        self.storage = (
+            DBStorage(self.request)
+            if settings.PERSIST_CART_TO_DB and self.request.user.is_authenticated
+            else SessionStorage(self.storage)
         )
-        if self._persist_to_db:
-            obj, _ = models.Cart.objects.get_or_create(
-                customer=self.request.user, defaults={"items": []}
-            )
-            items = obj.items
-        else:
-            items = self.request.session.get(settings.CART_SESSION_KEY, [])
-        self._items = [CartItem(**v) for v in items]
+        self._items = [CartItem(**item) for item in self.storage.load()]
 
     def __len__(self):
         return self.unique_count
@@ -58,14 +54,8 @@ class Cart:
         for item in self._items:
             yield item
 
-    def __contains__(self, el: Product | set[Product, Variant]):
-        """
-        Checks if a given product or set of product and variant is in the cart.
-        """
-        if isinstance(el, set):
-            assert len(el) != 2, "The len of the set must be exactly 2"
-            return el in ({item.product, item.variant} for item in self)
-        return el in self.products
+    def __contains__(self, item: CartItem) -> bool:
+        return item in self._items
 
     @property
     def total(self) -> Decimal:
@@ -90,21 +80,27 @@ class Cart:
         return len(self._items)
 
     @property
-    def products(self):
+    def products(self) -> QuerySet[Product]:
         """
         The list of associated products.
         """
         return Product.objects.filter(pk__in={item.product_pk for item in self._items})
 
-    def find(self) -> list[CartItem]:
+    def find(self, **criteria) -> list[CartItem]:
         """
-        Returns cart items base on the product and or variant
+        Returns a list of cart items matching the given criteria.
         """
+        get_item_dict = lambda item: {key: getattr(item, key) for key in criteria}
+        return [item for item in self._items if get_item_dict(item) == criteria]
 
-    def find_first(self) -> CartItem | None:
+    def find_one(self, **criteria) -> Optional[CartItem]:
         """
-        Does the same thing as find but returns the first element or None
+        Returns the cart item matching the given criteria, if no match is found return None.
         """
+        try:
+            return self.find(**criteria)[0]
+        except KeyError:
+            return None
 
     def add(
         self,
@@ -128,22 +124,20 @@ class Cart:
             assert isinstance(
                 variant, Variant
             ), f"{variant} does not have an allowed type"
-        item = CartItem(
-            product_pk=str(product.pk),
-            price=Decimal(str(price)),
-            quantity=int(quantity),
-            variant=variant,
-        )
+        price = Decimal(str(price))
+        item = self.find_one(product=product, variant=variant, price=price)
+        if not item:
+            item = CartItem(
+                product_pk=str(product.pk),
+                price=price,
+                quantity=int(quantity),
+                variant=variant,
+            )
         self.before_add(item=item)
-        try:
-            item = self._items[self._items.index(item)]
-        except ValueError:
-            self._items.append(item)
+        if override_quantity:
+            item.quantity = item.quantity
         else:
-            if override_quantity:
-                item.quantity = item.quantity
-            else:
-                item += item.quantity
+            item += item.quantity
         self.save()
         self.after_add(item=item)
         return item
@@ -162,41 +156,28 @@ class Cart:
         :param variant: Variant details of the product
         :return: The removed item with updated quantity if it exists
         """
-        item = None
-        for item_ in self._items:
-            if item_.product == product and item_.variant == variant:
-                item = item_
-        if item:
-            self.before_remove(item=item)
-            if quantity:
-                item.quantity -= quantity
-            else:
-                self._items.pop(self._items.index(item))
+        item = self.find_one(product=product, variant=variant)
+        self.before_remove(item=item)
+        if not item:
+            return None
+        if quantity:
+            item.quantity -= quantity
+        else:
+            self._items.pop(self._items.index(item))
         self.after_remove(item)
         self.save()
         return item
 
     def save(self) -> None:
         data = [asdict(item) for item in self._items]
-        if self._persist_to_db:
-            models.Cart.objects.update_or_create(
-                customer=self.request.user,
-                default={"items": data},
-            )
-        else:
-            self.request.session[settings.CART_SESSION_KEY] = data
-            self.request.session.modified = True
+        self.storage.save(data)
 
     def empty(self) -> None:
-        if self._persist_to_db:
-            models.Cart.objects.filter(customer=self.request.user).delete()
-        else:
-            self.request.session[settings.CART_SESSION_KEY] = []
-            self.request.session.modified = True
+        self.storage.clear()
 
-    def variants_groupby_product(self) -> dict:
+    def variants_group_by_product(self) -> dict:
         """
-        Return a dictonary with the products ids as keys and a list of variant as values
+        Return a dictionary with the products ids as keys and a list of variant as values
         """
         return {
             key: list(items)
@@ -211,7 +192,7 @@ class Cart:
     def after_add(self, item: CartItem) -> None:
         pass
 
-    def before_remove(self, item: CartItem) -> None:
+    def before_remove(self, item: Optional[CartItem]) -> None:
         pass
 
     def after_remove(self, item: CartItem) -> None:

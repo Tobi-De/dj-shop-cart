@@ -10,7 +10,7 @@ from django.db import models
 from django.db.models import QuerySet
 from django.http import HttpRequest
 
-from . import settings
+from . import conf
 from .protocols import Storage
 from .storages import DBStorage, SessionStorage
 from .utils import Variant, check_variant_type, get_module
@@ -60,7 +60,7 @@ class Cart:
         if not self.storage:
             self.storage = (
                 DBStorage(self.request)
-                if settings.PERSIST_CART_TO_DB and self.request.user.is_authenticated
+                if conf.PERSIST_CART_TO_DB and self.request.user.is_authenticated
                 else SessionStorage(self.request)
             )
         assert isinstance(self.storage, Storage)
@@ -225,9 +225,9 @@ def get_cart_manager_class() -> type[Cart]:
     """
     Returns the app
     """
-    if not settings.CART_MANAGER_CLASS:
+    if not conf.CART_MANAGER_CLASS:
         return Cart
-    klass = get_module(settings.CART_MANAGER_CLASS)
+    klass = get_module(conf.CART_MANAGER_CLASS)
     if not issubclass(klass, Cart):
         raise ImproperlyConfigured(
             "The `CART_MANAGER_CLASS` settings must point to a subclass of the `Cart` class."

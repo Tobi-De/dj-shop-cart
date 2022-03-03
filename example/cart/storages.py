@@ -4,14 +4,14 @@ from dataclasses import dataclass
 
 from django.http import HttpRequest
 
-from . import settings
+from . import conf
 from .models import Cart
 
 
 @dataclass
 class SessionStorage:
     request: HttpRequest
-    session_key: str = settings.CART_SESSION_KEY
+    session_key: str = conf.CART_SESSION_KEY
 
     def load(self) -> list[dict]:
         return self.request.session.get(self.session_key, [])

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from django.db import models
 from django.utils import timezone
 
@@ -5,7 +7,7 @@ from django.utils import timezone
 class Product(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    price = models.DecimalField(max_length=5, decimal_places=2)
+    price = models.DecimalField(max_digits=5, decimal_places=2)
     created = models.DateTimeField(default=timezone.now)
     modified = models.DateTimeField(auto_now_add=True)
 
@@ -16,7 +18,7 @@ class Product(models.Model):
 class ProductVariant(models.Model):
     product = models.OneToOneField(Product, on_delete=models.CASCADE)
     size = models.IntegerField()
-    color = models.CharField()
+    color = models.CharField(max_length=255)
     created = models.DateTimeField(default=timezone.now)
     modified = models.DateTimeField(auto_now_add=True)
 

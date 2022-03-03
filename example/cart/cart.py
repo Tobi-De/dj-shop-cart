@@ -1,40 +1,49 @@
 from __future__ import annotations
 
 import itertools
-from dataclasses import asdict, dataclass, field
+from dataclasses import InitVar, asdict, dataclass, field
 from decimal import Decimal
-from typing import Iterator
+from typing import Iterator, TypeVar
 
 from django.core.exceptions import ImproperlyConfigured
+from django.db import models
 from django.db.models import QuerySet
 from django.http import HttpRequest
 
 from . import settings
 from .protocols import Storage
 from .storages import DBStorage, SessionStorage
-from .utils import (
-    DjangoModelType,
-    Variant,
-    check_variant_type,
-    get_module,
-    get_product_model,
-)
+from .utils import Variant, check_variant_type, get_module
 
 __all__ = ("Cart", "CartItem", "get_cart_manager_class")
 
-Product: DjangoModelType = get_product_model()
+Product = TypeVar("Product", bound=models.Model)
 
 
 @dataclass(slots=True)
 class CartItem:
-    product_pk: str
+    product: InitVar[Product]
+
     price: Decimal
     quantity: int = field(compare=False)
     variant: Variant | None = None
+    _product_pk: str | None = None
+    _product_class_path: str | None = None
+
+    def __post_init__(self, product: Product) -> None:
+        self._product_pk = str(product.pk)
+        self._product_class_path = (
+            f"{product.__class__.__module__}.{product.__class__.__name__}"
+        )
+
+    @property
+    def product_pk(self) -> str:
+        return self._product_pk
 
     @property
     def product(self) -> Product:
-        return Product.objects.get(pk=self.product_pk)
+        ProductClass: type[Product] = get_module(self._product_class_path)  # noqa
+        return ProductClass.objects.get(pk=self._product_pk)
 
     @property
     def subtotal(self) -> Decimal:
@@ -136,10 +145,10 @@ class Cart:
         if variant:
             check_variant_type(variant)
         price = Decimal(str(price))
-        item = self.find_one(product=product, variant=variant, price=price)
+        item = self.find_one(product=product, variant=variant)
         if not item:
             item = CartItem(
-                product_pk=str(product.pk),
+                product=product,
                 price=price,
                 quantity=int(quantity),
                 variant=variant,

@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import List
 
 from django.http import HttpRequest
 
@@ -12,10 +13,10 @@ class SessionStorage:
     request: HttpRequest
     session_key: str = settings.CART_SESSION_KEY
 
-    def load(self) -> List[dict]:
+    def load(self) -> list[dict]:
         return self.request.session.get(self.session_key, [])
 
-    def save(self, items: List[dict]) -> None:
+    def save(self, items: list[dict]) -> None:
         self.request.session[self.session_key] = items
         self.request.session.modified = True
 
@@ -28,13 +29,13 @@ class SessionStorage:
 class DBStorage:
     request: HttpRequest
 
-    def load(self) -> List[dict]:
+    def load(self) -> list[dict]:
         cart = Cart.objects.get_or_create(
             customer=self.request.user, defaults={"items": []}
         )
         return cart.items
 
-    def save(self, items: List[dict]) -> None:
+    def save(self, items: list[dict]) -> None:
         Cart.objects.update_or_create(
             customer=self.request.user,
             default={"items": items},

@@ -1,20 +1,28 @@
+from __future__ import annotations
+
 import itertools
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from decimal import Decimal
-from typing import Union, List, Type, Optional
+from typing import Iterator
 
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import QuerySet
 from django.http import HttpRequest
 
 from . import settings
+from .protocols import Storage
 from .storages import DBStorage, SessionStorage
-from .typing import Variant, Storage
-from .utils import get_module, get_product_model, check_variant_type
+from .utils import (
+    DjangoModelType,
+    Variant,
+    check_variant_type,
+    get_module,
+    get_product_model,
+)
 
 __all__ = ("Cart", "CartItem", "get_cart_manager_class")
 
-Product = get_product_model()
+Product: DjangoModelType = get_product_model()
 
 
 @dataclass(slots=True)
@@ -33,47 +41,49 @@ class CartItem:
         return self.price * self.quantity
 
 
-@dataclass
+@dataclass(slots=True)
 class Cart:
     request: HttpRequest
-    storage: Optional[Storage] = None
-    _items: List[CartItem] = field(default_factory=list)
+    storage: Storage | None = None
+    _items: list[CartItem] = field(default_factory=list)
 
-    def __post_init__(self):
-        self.storage = (
-            DBStorage(self.request)
-            if settings.PERSIST_CART_TO_DB and self.request.user.is_authenticated
-            else SessionStorage(self.request)
-        )
+    def __post_init__(self) -> None:
+        if not self.storage:
+            self.storage = (
+                DBStorage(self.request)
+                if settings.PERSIST_CART_TO_DB and self.request.user.is_authenticated
+                else SessionStorage(self.request)
+            )
+        assert isinstance(self.storage, Storage)
+        self.storage: Storage
         self._items = [CartItem(**item) for item in self.storage.load()]
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.unique_count
 
-    def __iter__(self):
-        for item in self._items:
-            yield item
+    def __iter__(self) -> Iterator:
+        yield from self._items
 
     def __contains__(self, item: CartItem) -> bool:
         return item in self._items
 
     @property
     def total(self) -> Decimal:
-        return sum([item.subtotal for item in self._items])
+        return sum(item.subtotal for item in self._items)
 
     @property
     def is_empty(self) -> bool:
         return self.unique_count == 0
 
     @property
-    def count(self):
+    def count(self) -> int:
         """
         The number of items in cart, that's the sum of quantities.
         """
-        return sum([item.quantity for item in self._items])
+        return sum(item.quantity for item in self._items)
 
     @property
-    def unique_count(self):
+    def unique_count(self) -> int:
         """
         The number of unique items in cart, regardless of the quantity.
         """
@@ -86,14 +96,17 @@ class Cart:
         """
         return Product.objects.filter(pk__in={item.product_pk for item in self._items})
 
-    def find(self, **criteria) -> list[CartItem]:
+    def find(self, **criteria: dict) -> list[CartItem]:
         """
         Returns a list of cart items matching the given criteria.
         """
-        get_item_dict = lambda item: {key: getattr(item, key) for key in criteria}
+
+        def get_item_dict(item: CartItem) -> dict:
+            return {key: getattr(item, key) for key in criteria}
+
         return [item for item in self._items if get_item_dict(item) == criteria]
 
-    def find_one(self, **criteria) -> Optional[CartItem]:
+    def find_one(self, **criteria: dict) -> CartItem | None:
         """
         Returns the cart item matching the given criteria, if no match is found return None.
         """
@@ -104,12 +117,12 @@ class Cart:
 
     def add(
         self,
-        product: Type[Product],
+        product: Product,
         *,
-        price: Union[Decimal, str],
+        price: Decimal | str,
         quantity: int = 1,
         variant: Variant | None = None,
-        override_quantity=False,
+        override_quantity: bool = False,
     ) -> CartItem:
         """
         Add a new item to the cart.
@@ -135,14 +148,14 @@ class Cart:
         if override_quantity:
             item.quantity = item.quantity
         else:
-            item += item.quantity
+            item.quantity += item.quantity
         self.save()
         self.after_add(item=item)
         return item
 
     def remove(
         self,
-        product: Type[Product],
+        product: Product,
         *,
         quantity: int | None = None,
         variant: Variant | None = None,
@@ -177,7 +190,7 @@ class Cart:
 
     def variants_group_by_product(self) -> dict:
         """
-        Return a dictionary with the products ids as keys and a list of variant as values
+        Return a dictionary with the products ids as keys and a list of variant as values.
         """
         return {
             key: list(items)
@@ -192,14 +205,14 @@ class Cart:
     def after_add(self, item: CartItem) -> None:
         pass
 
-    def before_remove(self, item: Optional[CartItem]) -> None:
+    def before_remove(self, item: CartItem | None) -> None:
         pass
 
     def after_remove(self, item: CartItem) -> None:
         pass
 
 
-def get_cart_manager_class() -> Type[Cart]:
+def get_cart_manager_class() -> type[Cart]:
     """
     Returns the app
     """

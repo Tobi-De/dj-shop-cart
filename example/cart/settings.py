@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from django.conf import settings
 
 CART_SESSION_KEY: str = getattr(settings, "CART_SESSION_KEY", "CART-ID")

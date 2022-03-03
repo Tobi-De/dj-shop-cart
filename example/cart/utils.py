@@ -1,11 +1,17 @@
+from __future__ import annotations
+
 from importlib import import_module
-from typing import cast
+from typing import TypeVar, cast
 
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 
 from . import settings
-from .typing import DjangoModelType, Variant
+from .protocols import IsDataclass
+
+Variant = str | int | dict | set | list | tuple | IsDataclass
+
+DjangoModelType = TypeVar("DjangoModelType", bound=models.Model)
 
 
 def check_variant_type(variant: Variant) -> None:

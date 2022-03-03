@@ -8,12 +8,36 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.10"
 Django = "^4.0.2"
-cart = "^1.2.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.1"
 pytest-django = "^4.5.2"
 mypy = "^0.931"
+pre-commit = "^2.17.0"
+black = "^22.1.0"
+django-stubs = "^1.9.0"
+
+[tool.black]
+target-version = ['py37']
+
+[tool.isort]
+profile = "black"
+add_imports = "from __future__ import annotations"
+
+[tool.mypy]
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+mypy_path = "example/cart/"
+no_implicit_optional = true
+show_error_codes = true
+warn_unreachable = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+allow_untyped_defs = true
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

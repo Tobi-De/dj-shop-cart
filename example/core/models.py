@@ -16,7 +16,9 @@ class Product(models.Model):
 
 
 class ProductVariant(models.Model):
-    product = models.OneToOneField(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="variations"
+    )
     size = models.IntegerField()
     color = models.CharField(max_length=255)
     created = models.DateTimeField(default=timezone.now)

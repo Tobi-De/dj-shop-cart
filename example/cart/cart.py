@@ -22,10 +22,9 @@ Product = TypeVar("Product", bound=models.Model)
 
 @dataclass(slots=True)
 class CartItem:
-    product: InitVar[Product]
-
-    price: Decimal
+    price: Decimal = field(compare=False)
     quantity: int = field(compare=False)
+    product: InitVar[Product]
     variant: Variant | None = None
     _product_pk: str | None = None
     _product_class_path: str | None = None

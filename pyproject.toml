@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "djcart"
+name = "dj-shop-cart"
 version = "0.1.0"
 description = "Simple django cart manager for your django projects."
 authors = ["Tobi DEGNON <tobidegnon@protonmail.com>"]

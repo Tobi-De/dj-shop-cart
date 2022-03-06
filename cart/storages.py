@@ -5,7 +5,9 @@ from dataclasses import dataclass
 from django.http import HttpRequest
 
 from . import conf
-from .models import Cart
+
+if conf.PERSIST_CART_TO_DB:
+    from .models import Cart
 
 
 @dataclass
@@ -30,7 +32,7 @@ class DBStorage:
     request: HttpRequest
 
     def load(self) -> list[dict]:
-        cart = Cart.objects.get_or_create(
+        cart, _ = Cart.objects.get_or_create(
             customer=self.request.user, defaults={"items": []}
         )
         return cart.items
@@ -38,7 +40,7 @@ class DBStorage:
     def save(self, items: list[dict]) -> None:
         Cart.objects.update_or_create(
             customer=self.request.user,
-            default={"items": items},
+            defaults={"items": items},
         )
 
     def clear(self) -> None:

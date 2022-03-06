@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 import itertools
-from dataclasses import InitVar, asdict, dataclass, field
+from dataclasses import asdict, dataclass, field
 from decimal import Decimal
 from typing import Iterator, TypeVar
 
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models
-from django.db.models import QuerySet
 from django.http import HttpRequest
 
 from . import conf
@@ -15,7 +14,7 @@ from .protocols import Storage
 from .storages import DBStorage, SessionStorage
 from .utils import Variant, check_variant_type, get_module
 
-__all__ = ("Cart", "CartItem", "get_cart_manager_class")
+__all__ = ("Cart", "get_cart_manager_class")
 
 Product = TypeVar("Product", bound=models.Model)
 
@@ -24,16 +23,9 @@ Product = TypeVar("Product", bound=models.Model)
 class CartItem:
     price: Decimal = field(compare=False)
     quantity: int = field(compare=False)
-    product: InitVar[Product]
     variant: Variant | None = None
     _product_pk: str | None = None
     _product_class_path: str | None = None
-
-    def __post_init__(self, product: Product) -> None:
-        self._product_pk = str(product.pk)
-        self._product_class_path = (
-            f"{product.__class__.__module__}.{product.__class__.__name__}"
-        )
 
     @property
     def product_pk(self) -> str:
@@ -48,6 +40,28 @@ class CartItem:
     def subtotal(self) -> Decimal:
         return self.price * self.quantity
 
+    @classmethod
+    def from_product(
+        cls,
+        product: Product,
+        price: Decimal | str,
+        quantity,
+        variant: Variant | None = None,
+    ) -> CartItem:
+        instance = cls(
+            price=Decimal(str(price)), quantity=int(quantity), variant=variant
+        )
+        instance._product_pk = str(product.pk)
+        instance._product_class_path = (
+            f"{product.__class__.__module__}.{product.__class__.__name__}"
+        )
+        return instance
+
+    def as_dict(self) -> dict:
+        data = asdict(self)
+        data["price"] = str(self.price)
+        return data
+
 
 @dataclass(slots=True)
 class Cart:
@@ -57,11 +71,16 @@ class Cart:
 
     def __post_init__(self) -> None:
         if not self.storage:
-            self.storage = (
-                DBStorage(self.request)
-                if conf.PERSIST_CART_TO_DB and self.request.user.is_authenticated
-                else SessionStorage(self.request)
-            )
+            # The first thing we do is get back the data from the session because the user could
+            # authenticate himself after adding items to his cart, if we choose directly the db as
+            # the storage we could lose data previously store in the session. Data in the session
+            # have priority over the data in the database, so we migrate the data from the session to
+            # the db if needed
+            self.storage = SessionStorage(self.request)
+            if conf.PERSIST_CART_TO_DB and self.request.user.is_authenticated:
+                data = self.storage.load()
+                self.storage = DBStorage(self.request)
+                self.storage.save(data)
         assert isinstance(self.storage, Storage)
         self.storage: Storage
         self._items = [CartItem(**item) for item in self.storage.load()]
@@ -98,11 +117,11 @@ class Cart:
         return len(self._items)
 
     @property
-    def products(self) -> QuerySet[Product]:
+    def products(self) -> list[Product]:
         """
         The list of associated products.
         """
-        return Product.objects.filter(pk__in={item.product_pk for item in self._items})
+        return [item.product for item in self._items]
 
     def find(self, **criteria: dict) -> list[CartItem]:
         """
@@ -120,7 +139,7 @@ class Cart:
         """
         try:
             return self.find(**criteria)[0]
-        except KeyError:
+        except IndexError:
             return None
 
     def add(
@@ -144,19 +163,19 @@ class Cart:
         if variant:
             check_variant_type(variant)
         price = Decimal(str(price))
+        quantity = int(quantity)
+        assert quantity >= 1, "Can't add an item with a quantity less than 1"
         item = self.find_one(product=product, variant=variant)
         if not item:
-            item = CartItem(
-                product=product,
-                price=price,
-                quantity=int(quantity),
-                variant=variant,
+            item = CartItem.from_product(
+                product=product, price=price, quantity=0, variant=variant
             )
+            self._items.append(item)
         self.before_add(item=item)
         if override_quantity:
-            item.quantity = item.quantity
+            item.quantity = quantity
         else:
-            item.quantity += item.quantity
+            item.quantity += quantity
         self.save()
         self.after_add(item=item)
         return item
@@ -182,19 +201,23 @@ class Cart:
         if not item:
             return None
         if quantity:
-            item.quantity -= quantity
+            item.quantity -= int(quantity)
         else:
+            item.quantity = 0
+        if item.quantity <= 0:
             self._items.pop(self._items.index(item))
-        self.after_remove(item)
+        self.after_remove(item=item)
         self.save()
         return item
 
     def save(self) -> None:
-        data = [asdict(item) for item in self._items]
+        data = [item.as_dict() for item in self._items]
         self.storage.save(data)
 
     def empty(self) -> None:
+        self._items = []
         self.storage.clear()
+        self.save()
 
     def variants_group_by_product(self) -> dict:
         """
@@ -213,10 +236,10 @@ class Cart:
     def after_add(self, item: CartItem) -> None:
         pass
 
-    def before_remove(self, item: CartItem | None) -> None:
+    def before_remove(self, item: CartItem | None = None) -> None:
         pass
 
-    def after_remove(self, item: CartItem) -> None:
+    def after_remove(self, item: CartItem | None = None) -> None:
         pass
 
 

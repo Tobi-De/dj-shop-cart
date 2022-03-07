@@ -4,10 +4,12 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.sessions.backends.base import SessionBase
 from django.test import RequestFactory
+from factory import Faker
 
 from cart.cart import get_cart_manager_class
 from cart.storages import DBStorage, SessionStorage
 from tests.factories import ProductFactory
+from tests.models import Product
 
 pytestmark = pytest.mark.django_db
 
@@ -100,13 +102,11 @@ def test_cart_is_empty_db_storage(cart_db):
 
 
 def test_migrate_cart_from_session_to_db(
-    cart: Cart, session: SessionBase, rf: RequestFactory, django_user_model: User
+    cart: Cart, session: SessionBase, rf: RequestFactory, user: User, product: Product
 ):
     request = rf.get("/")
-    user = django_user_model.objects.create(username="someone", password="password")
     request.user = user
     request.session = session
-    product = ProductFactory()
     cart.add(product, price=product.price, quantity=5)
     assert isinstance(cart.storage, SessionStorage)
     cart = Cart(request=request)
@@ -148,3 +148,26 @@ def test_empty_cart_session_storage(cart: Cart):
 
 def test_empty_cart_db_storage(cart_db: Cart):
     empty_cart(cart=cart_db)
+
+
+def test_cart_item_subtotal(cart: Cart, product: Product):
+    cart.add(product, price=product.price, quantity=2)
+    assert [item.subtotal for item in cart][0] == product.price * 2
+    assert cart.total == product.price * 2
+
+
+def test_cart_total(cart: Cart):
+    product_a = ProductFactory()
+    product_b = ProductFactory()
+    cart.add(product_a, price=product_a.price, quantity=10)
+    cart.add(product_b, price=product_b.price, quantity=5)
+    assert cart.total == (product_a.price * 10) + (product_b.price * 5)
+
+
+def test_add_product_variant_func(cart: Cart, product: Product):
+    def get_variant(product):
+        return f"{Faker('name')}-{product.name}"
+
+    variant = get_variant(product)
+    cart.add(product, price=product.price, quantity=5, variant=get_variant)
+    assert cart.find_one(product=product).variant == variant

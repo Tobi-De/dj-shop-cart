@@ -9,6 +9,7 @@ from django.contrib.sessions.backends.base import SessionBase
 from django.test import RequestFactory
 
 from cart.cart import get_cart_manager_class
+from tests.factories import ProductFactory
 
 User = get_user_model()
 Cart = get_cart_manager_class()
@@ -34,9 +35,18 @@ def cart(rf: RequestFactory, session: SessionBase, settings) -> Cart:
 
 
 @pytest.fixture()
-def cart_db(rf: RequestFactory, django_user_model: User, session: SessionBase):
+def cart_db(rf: RequestFactory, user: User, session: SessionBase):
     request = rf.get("/")
-    user = django_user_model.objects.create(username="someone", password="password")
     request.user = user
     request.session = session
     return Cart(request=request)
+
+
+@pytest.fixture()
+def product():
+    return ProductFactory()
+
+
+@pytest.fixture()
+def user(django_user_model: type[User]):
+    return django_user_model.objects.create(username="someone", password="password")

@@ -2,9 +2,7 @@ from __future__ import annotations
 
 from importlib import import_module
 
-from .protocols import IsDataclass
-
-Variant = str | int | dict | set | list | tuple | IsDataclass
+Variant = str | int | dict | set
 
 
 def check_variant_type(variant: Variant) -> None:

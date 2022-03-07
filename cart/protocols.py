@@ -6,11 +6,6 @@ from django.http import HttpRequest
 
 
 @runtime_checkable
-class IsDataclass(Protocol):
-    __dataclass_fields__: dict
-
-
-@runtime_checkable
 class Storage(Protocol):
     request: HttpRequest
 

@@ -28,7 +28,7 @@ class CartItem:
     _product_class_path: str | None = None
 
     @property
-    def product_pk(self) -> str:
+    def product_pk(self) -> str | None:
         return self._product_pk
 
     @property
@@ -45,7 +45,7 @@ class CartItem:
         cls,
         product: Product,
         price: Decimal | str,
-        quantity,
+        quantity: int,
         variant: Variant | None = None,
     ) -> CartItem:
         instance = cls(
@@ -82,7 +82,6 @@ class Cart:
                 self.storage = DBStorage(self.request)
                 self.storage.save(data)
         assert isinstance(self.storage, Storage)
-        self.storage: Storage
         self._items = [CartItem(**item) for item in self.storage.load()]
 
     def __len__(self) -> int:
@@ -148,7 +147,7 @@ class Cart:
         *,
         price: Decimal | str,
         quantity: int = 1,
-        variant: Variant | None = None,
+        variant: Variant | callable[[Product], Variant] | None = None,
         override_quantity: bool = False,
     ) -> CartItem:
         """
@@ -160,6 +159,8 @@ class Cart:
         :param override_quantity: Add or override quantity if the item is already in  the cart
         :return: An instance of the item added
         """
+        if callable(variant):
+            variant = variant(product)
         if variant:
             check_variant_type(variant)
         price = Decimal(str(price))

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dj-shop-cart"
-version = "0.1.1-alpha.1"
+version = "0.1.1-alpha.2"
 description = "Simple django cart manager for your django projects."
 authors = ["Tobi DEGNON <tobidegnon@protonmail.com>"]
 license = "MIT"
@@ -13,8 +13,8 @@ packages=[
 ]
 
 [tool.poetry.dependencies]
-python = "^3.10"
-Django = "^4.0.2"
+python = "^3.8"
+Django = "^3.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.1"

@@ -4,7 +4,6 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.sessions.backends.base import SessionBase
 from django.test import RequestFactory
-from factory import Faker
 
 from cart.cart import get_cart_manager_class
 from cart.storages import DBStorage, SessionStorage
@@ -109,7 +108,7 @@ def test_migrate_cart_from_session_to_db(
     request.session = session
     cart.add(product, price=product.price, quantity=5)
     assert isinstance(cart.storage, SessionStorage)
-    cart = Cart(request=request)
+    cart = Cart.new(request)
     assert isinstance(cart.storage, DBStorage)
     assert product in cart.products
 
@@ -166,8 +165,27 @@ def test_cart_total(cart: Cart):
 
 def test_add_product_variant_func(cart: Cart, product: Product):
     def get_variant(product):
-        return f"{Faker('name')}-{product.name}"
+        return product.name
 
     variant = get_variant(product)
     cart.add(product, price=product.price, quantity=5, variant=get_variant)
     assert cart.find_one(product=product).variant == variant
+
+
+def test_cart_multiple_variants(cart: Cart, product: Product):
+    variant_a = "imavarianta"
+    variant_b = "imamvariantb"
+    cart.add(product, price=product.price, quantity=2, variant=variant_a)
+    cart.add(product, price=product.price, quantity=5, variant=variant_b)
+    assert cart.unique_count == len(cart) == 2
+    assert cart.find_one(product=product, variant=variant_a).quantity == 2
+    assert cart.find_one(product=product, variant=variant_b).quantity == 5
+    assert cart.count == 7
+
+
+def test_cart_variants_group_by_product(cart: Cart, product: Product):
+    variant_a = "imavarianta"
+    variant_b = "imamvariantb"
+    item_a = cart.add(product, price=product.price, quantity=2, variant=variant_a)
+    item_b = cart.add(product, price=product.price, quantity=5, variant=variant_b)
+    assert cart.variants_group_by_product() == {str(product.pk): [item_a, item_b]}

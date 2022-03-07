@@ -7,7 +7,9 @@ Variant = str | int | dict | set
 
 def check_variant_type(variant: Variant) -> None:
     if not isinstance(variant, Variant):
-        raise ValueError(f"{variant} does not have an allowed type")
+        raise ValueError(
+            f"Invalid variant type :{type(variant)}, expected str, int, dict or set."
+        )
 
 
 def get_module(path: str):

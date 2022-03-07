@@ -27,7 +27,7 @@ def cart(rf: RequestFactory, session: SessionBase, settings) -> Cart:
     request = rf.get("/")
     request.user = AnonymousUser()
     request.session = session
-    return Cart(request=request)
+    return Cart.new(request)
 
 
 # TODO changing the settings directly in the fixture doesn't affect the cart
@@ -39,7 +39,7 @@ def cart_db(rf: RequestFactory, user: User, session: SessionBase):
     request = rf.get("/")
     request.user = user
     request.session = session
-    return Cart(request=request)
+    return Cart.new(request)
 
 
 @pytest.fixture()

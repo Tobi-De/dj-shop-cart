@@ -189,3 +189,9 @@ def test_cart_variants_group_by_product(cart: Cart, product: Product):
     item_a = cart.add(product, price=product.price, quantity=2, variant=variant_a)
     item_b = cart.add(product, price=product.price, quantity=5, variant=variant_b)
     assert cart.variants_group_by_product() == {str(product.pk): [item_a, item_b]}
+
+
+def test_cart_item_with_metadata(cart: Cart, product: Product):
+    metadata = {"comment": "for some reason this item is special"}
+    cart.add(product, price=product.price, quantity=2, metadata=metadata)
+    assert metadata == cart.find_one(product=product).metadata

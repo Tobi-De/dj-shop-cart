@@ -8,7 +8,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.contrib.sessions.backends.base import SessionBase
 from django.test import RequestFactory
 
-from cart.cart import get_cart_manager_class
+from cart.api import get_cart_manager_class
 from tests.factories import ProductFactory
 
 User = get_user_model()

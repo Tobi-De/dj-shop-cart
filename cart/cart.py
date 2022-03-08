@@ -26,6 +26,7 @@ class CartItem:
     variant: Variant | None = field(default=None)
     product_pk: str = field(converter=str)
     product_class_path: str
+    metadata: dict = field(factory=dict, eq=False)
 
     @property
     def product(self) -> Product:
@@ -50,16 +51,19 @@ class CartItem:
         price: Decimal | str,
         quantity: int,
         variant: Variant | None = None,
+        metadata: dict | None = None,
     ) -> CartItem:
         product_class_path = (
             f"{product.__class__.__module__}.{product.__class__.__name__}"
         )
+        metadata = metadata or {}
         return cls(
             price=price,
             quantity=quantity,
             variant=variant,
             product_pk=product.pk,
             product_class_path=product_class_path,
+            metadata=metadata,
         )
 
 
@@ -133,14 +137,18 @@ class Cart:
         price: Decimal | str,
         quantity: int = 1,
         variant: Variant | Callable[[Product], Variant] | None = None,
+        metadata: dict | None = None,
         override_quantity: bool = False,
     ) -> CartItem:
         """
-        Add a new item to the cart.
+        Add a new item to the cart
         :param product: An instance of a database product
         :param price: The price of the product
         :param quantity: The quantity that will be added to the cart
         :param variant:  Variant details of the product
+        :param metadata: Optional metadata that is attached to the item, this dictionary can contain
+        anything that you would want to attach to the created item in cart, the only requirements about
+        it is that it needs to be json serializable
         :param override_quantity: Add or override quantity if the item is already in  the cart
         :return: An instance of the item added
         """
@@ -153,7 +161,7 @@ class Cart:
         item = self.find_one(product=product, variant=variant)
         if not item:
             item = CartItem.from_product(
-                product, price=price, quantity=0, variant=variant
+                product, price=price, quantity=0, variant=variant, metadata=metadata
             )
             self._items.append(item)
         self.before_add(item=item)
@@ -177,7 +185,7 @@ class Cart:
         :param product: An instance of a database product
         :param quantity: The quantity of the product to remove from the cart
         :param variant: Variant details of the product
-        :return: The removed item with updated quantity if it exists
+        :return: The removed item with an updated quantity or None
         """
         if variant:
             check_variant_type(variant)
@@ -249,13 +257,13 @@ class Cart:
 
 def get_cart_manager_class() -> type[Cart]:
     """
-    Returns the app
+    Returns the correct cart manager class
     """
     if not conf.CART_MANAGER_CLASS:
         return Cart
     klass = get_module(conf.CART_MANAGER_CLASS)
     if not issubclass(klass, Cart):
         raise ImproperlyConfigured(
-            "The `CART_MANAGER_CLASS` settings must point to a subclass of the `Cart` class."
+            "The `CART_MANAGER_CLASS` settings must refer to a subclass of the `Cart` class."
         )
     return klass

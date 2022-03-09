@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from cart.cart import get_cart_manager_class
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
+
+from dj_shop_cart.cart import get_cart_manager_class
 
 from .models import Product, ProductVariant
 

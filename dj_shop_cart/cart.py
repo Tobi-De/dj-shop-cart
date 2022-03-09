@@ -93,14 +93,14 @@ class Cart:
     @property
     def count(self) -> int:
         """
-        The number of items in cart, that's the sum of quantities.
+        The number of items in dj_shop_cart, that's the sum of quantities.
         """
         return sum(item.quantity for item in self._items)
 
     @property
     def unique_count(self) -> int:
         """
-        The number of unique items in cart, regardless of the quantity.
+        The number of unique items in dj_shop_cart, regardless of the quantity.
         """
         return len(self._items)
 
@@ -113,7 +113,7 @@ class Cart:
 
     def find(self, **criteria) -> list[CartItem]:
         """
-        Returns a list of cart items matching the given criteria.
+        Returns a list of dj_shop_cart items matching the given criteria.
         """
 
         def get_item_dict(item: CartItem) -> dict:
@@ -123,7 +123,7 @@ class Cart:
 
     def find_one(self, **criteria) -> CartItem | None:
         """
-        Returns the cart item matching the given criteria, if no match is found return None.
+        Returns the dj_shop_cart item matching the given criteria, if no match is found return None.
         """
         try:
             return self.find(**criteria)[0]
@@ -141,15 +141,15 @@ class Cart:
         override_quantity: bool = False,
     ) -> CartItem:
         """
-        Add a new item to the cart
+        Add a new item to the dj_shop_cart
         :param product: An instance of a database product
         :param price: The price of the product
-        :param quantity: The quantity that will be added to the cart
+        :param quantity: The quantity that will be added to the dj_shop_cart
         :param variant:  Variant details of the product
         :param metadata: Optional metadata that is attached to the item, this dictionary can contain
-        anything that you would want to attach to the created item in cart, the only requirements about
+        anything that you would want to attach to the created item in dj_shop_cart, the only requirements about
         it is that it needs to be json serializable
-        :param override_quantity: Add or override quantity if the item is already in  the cart
+        :param override_quantity: Add or override quantity if the item is already in  the dj_shop_cart
         :return: An instance of the item added
         """
         if callable(variant):
@@ -181,9 +181,9 @@ class Cart:
         variant: Variant | None = None,
     ) -> CartItem | None:
         """
-        Remove an item from the cart entirely or partially based on the quantity
+        Remove an item from the dj_shop_cart entirely or partially based on the quantity
         :param product: An instance of a database product
-        :param quantity: The quantity of the product to remove from the cart
+        :param quantity: The quantity of the product to remove from the dj_shop_cart
         :param variant: Variant details of the product
         :return: The removed item with an updated quantity or None
         """
@@ -237,10 +237,10 @@ class Cart:
 
     @classmethod
     def new(cls, request: HttpRequest, /, *, storage: Storage | None = None) -> Cart:
-        """Appropriately create a new cart instance"""
+        """Appropriately create a new dj_shop_cart instance"""
         if not storage:
             # The first thing we do is get back the data from the session because the user could
-            # authenticate himself after adding items to his cart, if we choose directly the db as
+            # authenticate himself after adding items to his dj_shop_cart, if we choose directly the db as
             # the storage we could lose data previously store in the session. Data in the session
             # have priority over the data in the database, so we migrate the data from the session to
             # the db if needed
@@ -257,7 +257,7 @@ class Cart:
 
 def get_cart_manager_class() -> type[Cart]:
     """
-    Returns the correct cart manager class
+    Returns the correct dj_shop_cart manager class
     """
     if not conf.CART_MANAGER_CLASS:
         return Cart

@@ -8,7 +8,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.contrib.sessions.backends.base import SessionBase
 from django.test import RequestFactory
 
-from cart.api import get_cart_manager_class
+from dj_shop_cart.cart import get_cart_manager_class
 from tests.factories import ProductFactory
 
 User = get_user_model()
@@ -30,7 +30,7 @@ def cart(rf: RequestFactory, session: SessionBase, settings) -> Cart:
     return Cart.new(request)
 
 
-# TODO changing the settings directly in the fixture doesn't affect the cart
+# TODO changing the settings directly in the fixture doesn't affect the dj_shop_cart
 #   initialization
 
 

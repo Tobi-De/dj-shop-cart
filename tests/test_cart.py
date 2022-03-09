@@ -5,8 +5,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.sessions.backends.base import SessionBase
 from django.test import RequestFactory
 
-from cart.cart import get_cart_manager_class
-from cart.storages import DBStorage, SessionStorage
+from dj_shop_cart.cart import get_cart_manager_class
+from dj_shop_cart.storages import DBStorage, SessionStorage
 from tests.factories import ProductFactory
 from tests.models import Product
 
@@ -16,7 +16,7 @@ Cart = get_cart_manager_class()
 User = get_user_model()
 
 
-# TODO test with custom cart manager class
+# TODO test with custom dj_shop_cart manager class
 #   test with variants
 
 

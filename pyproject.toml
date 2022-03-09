@@ -8,8 +8,8 @@ repository = "https://github.com/Tobi-De/dj-shop-cart"
 homepage = "https://github.com/Tobi-De/dj-shop-cart"
 keywords = ["django", "python", "cart", "shop", "ecommerce"]
 packages=[
-    { include = "cart" },
-    { include = "cart/migrations" },
+    { include = "dj_shop_cart" },
+    { include = "dj_shop_cart/migrations" },
 ]
 
 [tool.poetry.dependencies]

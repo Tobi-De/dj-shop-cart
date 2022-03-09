@@ -18,7 +18,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "tests",
-    "cart",
+    "dj_shop_cart",
 ]
 
 MIDDLEWARE: list[str] = []

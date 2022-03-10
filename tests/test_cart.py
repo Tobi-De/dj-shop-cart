@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 from django.contrib.sessions.backends.base import SessionBase
 from django.test import RequestFactory
 
@@ -163,15 +164,6 @@ def test_cart_total(cart: Cart):
     assert cart.total == (product_a.price * 10) + (product_b.price * 5)
 
 
-def test_add_product_variant_func(cart: Cart, product: Product):
-    def get_variant(product):
-        return product.name
-
-    variant = get_variant(product)
-    cart.add(product, price=product.price, quantity=5, variant=get_variant)
-    assert cart.find_one(product=product).variant == variant
-
-
 def test_cart_multiple_variants(cart: Cart, product: Product):
     variant_a = "imavarianta"
     variant_b = "imamvariantb"
@@ -195,3 +187,16 @@ def test_cart_item_with_metadata(cart: Cart, product: Product):
     metadata = {"comment": "for some reason this item is special"}
     cart.add(product, price=product.price, quantity=2, metadata=metadata)
     assert metadata == cart.find_one(product=product).metadata
+
+
+def test_cart_custom_manager(rf, session, custom_cart_manager, product):
+    request = rf.get("/")
+    request.user = AnonymousUser()
+    request.session = session
+    cart = custom_cart_manager.new(request)
+    item = cart.add(product, price=product.price)
+    assert "before_add" in item.metadata["hooks"]
+    assert "after_add" in item.metadata["hooks"]
+    item = cart.remove(product)
+    assert "before_remove" in item.metadata["hooks"]
+    assert "after_remove" in item.metadata["hooks"]

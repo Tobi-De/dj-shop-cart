@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import itertools
 from decimal import Decimal
-from typing import Callable, Iterator, TypeVar
+from typing import Iterator, TypeVar
 
 from attrs import Factory, asdict, define, field
 from django.core.exceptions import ImproperlyConfigured
@@ -136,7 +136,7 @@ class Cart:
         *,
         price: Decimal | str,
         quantity: int = 1,
-        variant: Variant | Callable[[Product], Variant] | None = None,
+        variant: Variant | None = None,
         metadata: dict | None = None,
         override_quantity: bool = False,
     ) -> CartItem:
@@ -152,8 +152,6 @@ class Cart:
         :param override_quantity: Add or override quantity if the item is already in  the dj_shop_cart
         :return: An instance of the item added
         """
-        if callable(variant):
-            variant = variant(product)
         if variant:
             check_variant_type(variant)
         quantity = int(quantity)
@@ -164,13 +162,13 @@ class Cart:
                 product, price=price, quantity=0, variant=variant, metadata=metadata
             )
             self._items.append(item)
-        self.before_add(item=item)
+        self.before_add(item=item, quantity=quantity)
         if override_quantity:
             item.quantity = quantity
         else:
             item.quantity += quantity
-        self.save()
         self.after_add(item=item)
+        self.save()
         return item
 
     def remove(
@@ -190,7 +188,7 @@ class Cart:
         if variant:
             check_variant_type(variant)
         item = self.find_one(product=product, variant=variant)
-        self.before_remove(item=item)
+        self.before_remove(item=item, quantity=quantity)
         if not item:
             return None
         if quantity:
@@ -223,13 +221,15 @@ class Cart:
             )
         }
 
-    def before_add(self, item: CartItem) -> None:
+    def before_add(self, item: CartItem, quantity: int) -> None:
         pass
 
     def after_add(self, item: CartItem) -> None:
         pass
 
-    def before_remove(self, item: CartItem | None = None) -> None:
+    def before_remove(
+        self, item: CartItem | None = None, quantity: int | None = None
+    ) -> None:
         pass
 
     def after_remove(self, item: CartItem | None = None) -> None:

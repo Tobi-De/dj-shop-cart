@@ -14,7 +14,7 @@ from .protocols import Storage
 from .storages import DBStorage, SessionStorage
 from .utils import Variant, check_variant_type, get_module
 
-__all__ = ("Cart", "get_cart_manager_class")
+__all__ = ("Cart", "CartItem", "get_cart_manager_class")
 
 Product = TypeVar("Product", bound=models.Model)
 

@@ -2,21 +2,18 @@ from __future__ import annotations
 
 import itertools
 from decimal import Decimal
-from typing import Iterator, TypeVar
+from typing import Iterator
 
 from attrs import Factory, asdict, define, field
 from django.core.exceptions import ImproperlyConfigured
-from django.db import models
 from django.http import HttpRequest
 
 from . import conf
-from .protocols import Storage
+from .protocols import Product, Storage
 from .storages import DBStorage, SessionStorage
 from .utils import Variant, check_variant_type, get_module
 
 __all__ = ("Cart", "CartItem", "get_cart_manager_class")
-
-Product = TypeVar("Product", bound=models.Model)
 
 
 @define(kw_only=True)

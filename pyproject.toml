@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dj-shop-cart"
-version = "2.0.2"
+version = "3.0.0"
 description = "Simple django cart manager for your django projects."
 authors = ["Tobi DEGNON <tobidegnon@protonmail.com>"]
 license = "MIT"
@@ -39,7 +39,7 @@ check_untyped_defs = true
 disallow_any_generics = true
 disallow_incomplete_defs = true
 disallow_untyped_defs = true
-mypy_path = "cart/"
+mypy_path = "dj_shop_cart/"
 no_implicit_optional = true
 show_error_codes = true
 warn_unreachable = true

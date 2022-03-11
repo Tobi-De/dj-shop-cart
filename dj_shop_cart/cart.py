@@ -248,7 +248,9 @@ class Cart:
             if conf.PERSIST_CART_TO_DB and request.user.is_authenticated:
                 data = storage.load()
                 storage = DBStorage(request)
-                storage.save(data)
+                # we should overwrite the data in db only if the session data is empty
+                if data:
+                    storage.save(data)
         assert isinstance(storage, Storage)
         instance = cls(request=request, storage=storage)  # noqa
         instance._items = [CartItem(**item) for item in storage.load()]

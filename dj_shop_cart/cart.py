@@ -21,7 +21,6 @@ Product = TypeVar("Product", bound=models.Model)
 
 @define(kw_only=True)
 class CartItem:
-    price: Decimal = field(eq=False, converter=Decimal)
     quantity: int = field(eq=False, converter=int)
     variant: Variant | None = field(default=None)
     product_pk: str = field(converter=str)
@@ -35,12 +34,7 @@ class CartItem:
 
     @property
     def subtotal(self) -> Decimal:
-        return self.price * self.quantity
-
-    def as_dict(self) -> dict:
-        data = asdict(self, filter=lambda attr, _: attr.name != "price")
-        data.update({"price": str(self.price)})
-        return data
+        return self.product.get_price(self) * self.quantity
 
     @classmethod
     def from_product(
@@ -48,7 +42,6 @@ class CartItem:
         product: Product,
         /,
         *,
-        price: Decimal | str,
         quantity: int,
         variant: Variant | None = None,
         metadata: dict | None = None,
@@ -58,7 +51,6 @@ class CartItem:
         )
         metadata = metadata or {}
         return cls(
-            price=price,
             quantity=quantity,
             variant=variant,
             product_pk=product.pk,
@@ -134,7 +126,6 @@ class Cart:
         self,
         product: Product,
         *,
-        price: Decimal | str,
         quantity: int = 1,
         variant: Variant | None = None,
         metadata: dict | None = None,
@@ -143,7 +134,6 @@ class Cart:
         """
         Add a new item to the dj_shop_cart
         :param product: An instance of a database product
-        :param price: The price of the product
         :param quantity: The quantity that will be added to the dj_shop_cart
         :param variant:  Variant details of the product
         :param metadata: Optional metadata that is attached to the item, this dictionary can contain
@@ -159,7 +149,7 @@ class Cart:
         item = self.find_one(product=product, variant=variant)
         if not item:
             item = CartItem.from_product(
-                product, price=price, quantity=0, variant=variant, metadata=metadata
+                product, quantity=0, variant=variant, metadata=metadata
             )
             self._items.append(item)
         self.before_add(item=item, quantity=quantity)
@@ -202,7 +192,7 @@ class Cart:
         return item
 
     def save(self) -> None:
-        data = [item.as_dict() for item in self._items]
+        data = [asdict(item) for item in self._items]
         self.storage.save(data)
 
     def empty(self) -> None:

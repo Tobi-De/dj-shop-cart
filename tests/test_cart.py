@@ -200,3 +200,6 @@ def test_cart_custom_manager(rf, session, custom_cart_manager, product):
     item = cart.remove(product)
     assert "before_remove" in item.metadata["hooks"]
     assert "after_remove" in item.metadata["hooks"]
+
+
+# todo write test to try loading data from previously saved db data

@@ -31,7 +31,11 @@ class CartItem:
 
     @property
     def subtotal(self) -> Decimal:
-        return self.product.get_price(self) * self.quantity
+        return self.price * self.quantity
+
+    @property
+    def price(self) -> Decimal:
+        return self.product.get_price(self)
 
     @classmethod
     def from_product(

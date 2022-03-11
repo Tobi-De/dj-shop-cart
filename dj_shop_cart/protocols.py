@@ -17,3 +17,9 @@ class Storage(Protocol):
 
     def clear(self) -> None:
         ...
+
+
+@runtime_checkable
+class SupportPricing(Protocol):
+    def get_price(self, item):
+        ...

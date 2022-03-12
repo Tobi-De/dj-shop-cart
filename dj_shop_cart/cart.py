@@ -2,18 +2,21 @@ from __future__ import annotations
 
 import itertools
 from decimal import Decimal
-from typing import Iterator
+from typing import Iterator, TypeVar
 
 from attrs import Factory, asdict, define, field
 from django.core.exceptions import ImproperlyConfigured
+from django.db import models
 from django.http import HttpRequest
 
 from . import conf
-from .protocols import Product, Storage
+from .protocols import Storage
 from .storages import DBStorage, SessionStorage
 from .utils import Variant, check_variant_type, get_module
 
 __all__ = ("Cart", "CartItem", "get_cart_manager_class")
+
+Product = TypeVar("Product", bound=models.Model)
 
 
 @define(kw_only=True)
@@ -35,7 +38,7 @@ class CartItem:
 
     @property
     def price(self) -> Decimal:
-        return self.product.get_price(self)
+        return getattr(self.product, conf.CART_PRODUCT_GET_PRICE)(self)
 
     @classmethod
     def from_product(
@@ -86,14 +89,14 @@ class Cart:
     @property
     def count(self) -> int:
         """
-        The number of items in dj_shop_cart, that's the sum of quantities.
+        The number of items in the cart, that's the sum of quantities.
         """
         return sum(item.quantity for item in self._items)
 
     @property
     def unique_count(self) -> int:
         """
-        The number of unique items in dj_shop_cart, regardless of the quantity.
+        The number of unique items in the cart, regardless of the quantity.
         """
         return len(self._items)
 
@@ -106,7 +109,7 @@ class Cart:
 
     def find(self, **criteria) -> list[CartItem]:
         """
-        Returns a list of dj_shop_cart items matching the given criteria.
+        Returns a list of cart items matching the given criteria.
         """
 
         def get_item_dict(item: CartItem) -> dict:
@@ -116,7 +119,7 @@ class Cart:
 
     def find_one(self, **criteria) -> CartItem | None:
         """
-        Returns the dj_shop_cart item matching the given criteria, if no match is found return None.
+        Returns the cart item matching the given criteria, if no match is found return None.
         """
         try:
             return self.find(**criteria)[0]
@@ -133,14 +136,14 @@ class Cart:
         override_quantity: bool = False,
     ) -> CartItem:
         """
-        Add a new item to the dj_shop_cart
+        Add a new item to the cart
         :param product: An instance of a database product
         :param quantity: The quantity that will be added to the dj_shop_cart
         :param variant:  Variant details of the product
         :param metadata: Optional metadata that is attached to the item, this dictionary can contain
-        anything that you would want to attach to the created item in dj_shop_cart, the only requirements about
+        anything that you would want to attach to the created item in cart, the only requirements about
         it is that it needs to be json serializable
-        :param override_quantity: Add or override quantity if the item is already in  the dj_shop_cart
+        :param override_quantity: Add or override quantity if the item is already in the cart
         :return: An instance of the item added
         """
         if variant:
@@ -170,9 +173,9 @@ class Cart:
         variant: Variant | None = None,
     ) -> CartItem | None:
         """
-        Remove an item from the dj_shop_cart entirely or partially based on the quantity
+        Remove an item from the cart entirely or partially based on the quantity
         :param product: An instance of a database product
-        :param quantity: The quantity of the product to remove from the dj_shop_cart
+        :param quantity: The quantity of the product to remove from the cart
         :param variant: Variant details of the product
         :return: The removed item with an updated quantity or None
         """
@@ -228,7 +231,7 @@ class Cart:
 
     @classmethod
     def new(cls, request: HttpRequest, /, *, storage: Storage | None = None) -> Cart:
-        """Appropriately create a new dj_shop_cart instance"""
+        """Appropriately create a new cart instance. This builder load existing cart if needed."""
         if not storage:
             # The first thing we do is get back the data from the session because the user could
             # authenticate himself after adding items to his dj_shop_cart, if we choose directly the db as
@@ -236,13 +239,13 @@ class Cart:
             # have priority over the data in the database, so we migrate the data from the session to
             # the db if needed
             storage = SessionStorage(request)
-            if conf.PERSIST_CART_TO_DB and request.user.is_authenticated:
+            if conf.CART_PERSIST_TO_DB and request.user.is_authenticated:
                 data = storage.load()
                 storage = DBStorage(request)
                 # we should overwrite the data in db only if the session data is empty
                 if data:
                     storage.save(data)
-        assert isinstance(storage, Storage)
+        assert isinstance(storage, Storage), "Invalid storage type"
         instance = cls(request=request, storage=storage)  # noqa
         instance._items = [CartItem(**item) for item in storage.load()]
         return instance
@@ -250,7 +253,7 @@ class Cart:
 
 def get_cart_manager_class() -> type[Cart]:
     """
-    Returns the correct dj_shop_cart manager class
+    Returns the correct cart manager class
     """
     if not conf.CART_MANAGER_CLASS:
         return Cart

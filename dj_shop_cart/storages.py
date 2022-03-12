@@ -6,7 +6,7 @@ from django.http import HttpRequest
 
 from . import conf
 
-if conf.PERSIST_CART_TO_DB:
+if conf.CART_PERSIST_TO_DB:
     from .models import Cart
 
 

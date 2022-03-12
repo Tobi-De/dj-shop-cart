@@ -1,9 +1,10 @@
 [tool.poetry]
 name = "dj-shop-cart"
-version = "3.0.1"
+version = "3.0.2"
 description = "Simple django cart manager for your django projects."
 authors = ["Tobi DEGNON <tobidegnon@protonmail.com>"]
 license = "MIT"
+readme = "README.md"
 repository = "https://github.com/Tobi-De/dj-shop-cart"
 homepage = "https://github.com/Tobi-De/dj-shop-cart"
 keywords = ["django", "python", "cart", "shop", "ecommerce"]
@@ -20,12 +21,13 @@ attrs = "^21.4.0"
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.1"
 pytest-django = "^4.5.2"
-mypy = "^0.931"
+mypy = "^0.940"
 pre-commit = "^2.17.0"
 black = "^22.1.0"
 django-stubs = "^1.9.0"
 factory-boy = "^3.2.1"
 ipython = "^8.1.1"
+poetryup = "^0.5.4"
 
 [tool.black]
 target-version = ['py37']
@@ -35,10 +37,6 @@ profile = "black"
 add_imports = "from __future__ import annotations"
 
 [tool.mypy]
-check_untyped_defs = true
-disallow_any_generics = true
-disallow_incomplete_defs = true
-disallow_untyped_defs = true
 mypy_path = "dj_shop_cart/"
 no_implicit_optional = true
 show_error_codes = true

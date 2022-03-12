@@ -15,7 +15,7 @@ A simple and flexible cart manager for your django projects.
 - Authenticated users cart can be saved to database
 - Write custom methods to easily hook into the items add / remove flow
 - Custom **get_price** method to ensure that the cart always have an up-to-date products price
-- Access to your django database **Product** instance from the cart items
+- Each item in the cart hold a reference to the associated product
 - Metadata data can be attached to cart items
 - Supports specification of product variation details
 - Available context processor for easy access to the user cart in all your django templates

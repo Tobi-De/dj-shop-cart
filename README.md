@@ -5,6 +5,7 @@ A simple and flexible cart manager for your django projects.
 [![pypi](https://badge.fury.io/py/dj-shop-cart.svg)](https://pypi.org/project/dj-shop-cart/)
 [![python](https://img.shields.io/pypi/pyversions/dj-shop-cart)](https://github.com/Tobi-De/dj-shop-cart)
 [![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/Tobi-De/dj-shop-cart/blob/master/LICENSE)
+[![black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 **This is a work in progress, expect api breaking changes, pin the exact version you are using**
 
@@ -51,6 +52,22 @@ TEMPLATES = [
     }
 ]
 
+# models.py
+
+from django.db import models
+from dj_shop_cart.cart import CartItem
+from decimal import Decimal
+
+class Product(models.Model):
+    ...
+
+    def get_price(self, item:CartItem)->Decimal:
+        """The only requirements of the dj_shop_cart package apart from the fact that the products you add
+        must be instances of django based models classes. You can change this method name and update the
+        according setting (see Configuration).
+        """
+
+
 # views.py
 
 from dj_shop_cart.cart import get_cart_manager_class
@@ -85,7 +102,31 @@ def empty_cart(request: HttpRequest):
 
 ```
 
+## Configuration
 
+Configure the cart behaviour in your Django settings. All settings are optional.
+
+| Name                   | Type | Description                                                                                                       | Default   |
+|------------------------|------|-------------------------------------------------------------------------------------------------------------------|-----------|
+| CART_SESSION_KEY       | str  | The session key of the cart                                                                                       | CART-ID   |
+| CART_MANAGER_CLASS     | str  | The path to a custom **Cart** manager class. The custom class need to be a subclass of **dj_shop_cart.cart.Cart** | None      |
+| CART_PRODUCT_GET_PRICE | str  | The method name to use to dynamically get the price on the product instance                                       | get_price |
+
+## Development
+
+Poetry is required (not really, you can set up the environment however you want and install the requirements
+manually) to set up a virtualenv, install it then run the following:
+
+```sh
+poetry install
+pre-commit install --install-hooks
+```
+
+Tests can then be run quickly in that environment:
+
+```sh
+pytest
+```
 
 ## Feedback
 
@@ -94,7 +135,7 @@ If you have any feedback, please reach out to me at degnonfrancis@gmail.com
 ## Todos
 
 - More examples
+- Complete the example project
 - Add api reference
 - Add Used by section to readme
 - Write more tests
-- Add local dev section to readme

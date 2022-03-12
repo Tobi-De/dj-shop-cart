@@ -119,7 +119,7 @@ class Cart:
 
     def find_one(self, **criteria) -> CartItem | None:
         """
-        Returns the cart item matching the given criteria, if no match is found return None.
+        Returns the first cart item that matches the given criteria, if no match is found return None.
         """
         try:
             return self.find(**criteria)[0]
@@ -137,13 +137,14 @@ class Cart:
     ) -> CartItem:
         """
         Add a new item to the cart
+
         :param product: An instance of a database product
         :param quantity: The quantity that will be added to the dj_shop_cart
         :param variant:  Variant details of the product
         :param metadata: Optional metadata that is attached to the item, this dictionary can contain
-        anything that you would want to attach to the created item in cart, the only requirements about
-        it is that it needs to be json serializable
-        :param override_quantity: Add or override quantity if the item is already in the cart
+            anything that you would want to attach to the created item in cart, the only requirements about
+            it is that it needs to be json serializable
+        :param override_quantity: If true will overwrite the quantity of the item if it already exists
         :return: An instance of the item added
         """
         if variant:
@@ -174,6 +175,7 @@ class Cart:
     ) -> CartItem | None:
         """
         Remove an item from the cart entirely or partially based on the quantity
+
         :param product: An instance of a database product
         :param quantity: The quantity of the product to remove from the cart
         :param variant: Variant details of the product
@@ -202,7 +204,6 @@ class Cart:
     def empty(self) -> None:
         self._items = []
         self.storage.clear()
-        self.save()
 
     def variants_group_by_product(self) -> dict[str, list[CartItem]]:
         """

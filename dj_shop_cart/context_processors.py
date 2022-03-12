@@ -8,4 +8,4 @@ Cart = get_cart_manager_class()
 
 
 def cart(request: HttpRequest) -> dict:
-    return {"dj_shop_cart": Cart.new(request)}
+    return {"cart": Cart.new(request)}

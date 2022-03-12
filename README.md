@@ -63,8 +63,9 @@ class Product(models.Model):
 
     def get_price(self, item:CartItem)->Decimal:
         """The only requirements of the dj_shop_cart package apart from the fact that the products you add
-        must be instances of django based models classes. You can change this method name and update the
-        according setting (see Configuration).
+        to the cart must be instances of django based models. You can use a different name for this method
+        but be sure to update the corresponding setting (see Configuration). Even if you change the name the
+        function signature should match this one.
         """
 
 
@@ -108,7 +109,7 @@ Configure the cart behaviour in your Django settings. All settings are optional.
 
 | Name                   | Type | Description                                                                                                       | Default   |
 |------------------------|------|-------------------------------------------------------------------------------------------------------------------|-----------|
-| CART_SESSION_KEY       | str  | The session key of the cart                                                                                       | CART-ID   |
+| CART_SESSION_KEY       | str  | The key used to store the cart in session                                                                            | CART-ID   |
 | CART_MANAGER_CLASS     | str  | The path to a custom **Cart** manager class. The custom class need to be a subclass of **dj_shop_cart.cart.Cart** | None      |
 | CART_PRODUCT_GET_PRICE | str  | The method name to use to dynamically get the price on the product instance                                       | get_price |
 
@@ -134,8 +135,8 @@ If you have any feedback, please reach out to me at degnonfrancis@gmail.com
 
 ## Todos
 
+- Add api reference in readme
+- Add Used by section to readme
 - More examples
 - Complete the example project
-- Add api reference
-- Add Used by section to readme
 - Write more tests

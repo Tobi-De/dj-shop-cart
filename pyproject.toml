@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dj-shop-cart"
-version = "3.0.3"
+version = "3.0.4"
 description = "Simple django cart manager for your django projects."
 authors = ["Tobi DEGNON <tobidegnon@protonmail.com>"]
 license = "MIT"
@@ -11,6 +11,15 @@ keywords = ["django", "python", "cart", "shop", "ecommerce"]
 packages=[
     { include = "dj_shop_cart" },
     { include = "dj_shop_cart/migrations" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Framework :: Django :: 3.0",
+    "Framework :: Django :: 3.1",
+    "Framework :: Django :: 3.2",
+    "Framework :: Django :: 4.0",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
 ]
 
 [tool.poetry.dependencies]

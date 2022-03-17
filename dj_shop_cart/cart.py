@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import itertools
 from decimal import Decimal
-from typing import Iterator, TypeVar
+from typing import Iterator, TypeVar, Union
 
 from attrs import Factory, asdict, define, field
 from django.core.exceptions import ImproperlyConfigured
@@ -12,11 +12,12 @@ from django.http import HttpRequest
 from . import conf
 from .protocols import Storage
 from .storages import DBStorage, SessionStorage
-from .utils import Variant, check_variant_type, get_module
+from .utils import get_module
 
 __all__ = ("Cart", "CartItem", "get_cart_manager_class")
 
 Product = TypeVar("Product", bound=models.Model)
+Variant = Union[str, int, dict, set]
 
 
 @define(kw_only=True)
@@ -147,8 +148,6 @@ class Cart:
         :param override_quantity: If true will overwrite the quantity of the item if it already exists
         :return: An instance of the item added
         """
-        if variant:
-            check_variant_type(variant)
         quantity = int(quantity)
         assert quantity >= 1, f"Item quantity must be greater than 1: {quantity}"
         item = self.find_one(product=product, variant=variant)
@@ -181,8 +180,6 @@ class Cart:
         :param variant: Variant details of the product
         :return: The removed item with an updated quantity or None
         """
-        if variant:
-            check_variant_type(variant)
         item = self.find_one(product=product, variant=variant)
         self.before_remove(item=item, quantity=quantity)
         if not item:

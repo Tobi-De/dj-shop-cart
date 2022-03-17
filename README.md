@@ -76,6 +76,7 @@ from dj_shop_cart.cart import get_cart_manager_class
 from django.http import HttpRequest
 from django.views.decorators.http import require_POST
 
+# This function has nothing to do with the package itself
 from .helpers import collect_params
 
 Cart = get_cart_manager_class()
@@ -138,6 +139,7 @@ If you have any feedback, please reach out to me at degnonfrancis@gmail.com
 
 - Add api reference in readme
 - Add Used by section to readme
+- Add a redis storage backend and rework the api for easy integration of custom storage backends
 - More examples
 - Complete the example project
 - Write more tests

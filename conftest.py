@@ -8,11 +8,11 @@ from django.contrib.auth.models import AnonymousUser
 from django.contrib.sessions.backends.base import SessionBase
 from django.test import RequestFactory
 
-from dj_shop_cart.cart import get_cart_manager_class
+from dj_shop_cart.cart import get_cart_class
 from tests.factories import ProductFactory
 
 User = get_user_model()
-Cart = get_cart_manager_class()
+Cart = get_cart_class()
 
 
 @pytest.fixture()

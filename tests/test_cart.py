@@ -6,14 +6,14 @@ from django.contrib.auth.models import AnonymousUser
 from django.contrib.sessions.backends.base import SessionBase
 from django.test import RequestFactory
 
-from dj_shop_cart.cart import get_cart_manager_class
+from dj_shop_cart.cart import get_cart_class
 from dj_shop_cart.storages import DBStorage, SessionStorage
 from tests.factories import ProductFactory
 from tests.models import Product
 
 pytestmark = pytest.mark.django_db
 
-Cart = get_cart_manager_class()
+Cart = get_cart_class()
 User = get_user_model()
 
 

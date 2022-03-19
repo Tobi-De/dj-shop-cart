@@ -11,10 +11,10 @@ from django.http import HttpRequest
 
 from . import conf
 from .protocols import Storage
-from .storages import DBStorage, SessionStorage
+from .storages import get_storage_class, storage_factory
 from .utils import get_module
 
-__all__ = ("Cart", "CartItem", "get_cart_manager_class")
+__all__ = ("Cart", "CartItem", "get_cart_class")
 
 Product = TypeVar("Product", bound=models.Model)
 Variant = Union[str, int, dict, set]
@@ -39,7 +39,7 @@ class CartItem:
 
     @property
     def price(self) -> Decimal:
-        return getattr(self.product, conf.CART_PRODUCT_GET_PRICE)(self)
+        return getattr(self.product, conf.CART_PRODUCT_GET_PRICE_METHOD)(self)
 
     @classmethod
     def from_product(
@@ -228,36 +228,24 @@ class Cart:
         pass
 
     @classmethod
-    def new(cls, request: HttpRequest, /, *, storage: Storage | None = None) -> Cart:
+    def new(cls, request: HttpRequest) -> Cart:
         """Appropriately create a new cart instance. This builder load existing cart if needed."""
-        if not storage:
-            # The first thing we do is get back the data from the session because the user could
-            # authenticate himself after adding items to his dj_shop_cart, if we choose directly the db as
-            # the storage we could lose data previously store in the session. Data in the session
-            # have priority over the data in the database, so we migrate the data from the session to
-            # the db if needed
-            storage = SessionStorage(request)
-            if conf.CART_PERSIST_TO_DB and request.user.is_authenticated:
-                data = storage.load()
-                storage = DBStorage(request)
-                # we should overwrite the data in db only if the session data is empty
-                if data:
-                    storage.save(data)
-        assert isinstance(storage, Storage), "Invalid storage type"
+        storage_class = get_storage_class(request)
+        storage = storage_factory(request=request, storage_class=storage_class)  # noqa
         instance = cls(request=request, storage=storage)  # noqa
         instance._items = [CartItem(**item) for item in storage.load()]
         return instance
 
 
-def get_cart_manager_class() -> type[Cart]:
+def get_cart_class() -> type[Cart]:
     """
     Returns the correct cart manager class
     """
-    if not conf.CART_MANAGER_CLASS:
+    if not conf.CART_CUSTOM_CLASS:
         return Cart
-    klass = get_module(conf.CART_MANAGER_CLASS)
+    klass = get_module(conf.CART_CUSTOM_CLASS)
     if not issubclass(klass, Cart):
         raise ImproperlyConfigured(
-            "The `CART_MANAGER_CLASS` settings must refer to a subclass of the `Cart` class."
+            "The `CART_CUSTOM_CLASS` settings must be a subclass of the `Cart` class."
         )
     return klass

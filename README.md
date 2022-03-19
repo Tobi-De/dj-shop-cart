@@ -8,8 +8,6 @@ A simple and flexible cart manager for your django projects.
 [![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/Tobi-De/dj-shop-cart/blob/master/LICENSE)
 [![black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-**This is a work in progress, expect api breaking changes, pin the exact version you are using**
-
 ## Features
 
 - Add, remove, decrement and clear items from cart
@@ -72,14 +70,14 @@ class Product(models.Model):
 
 # views.py
 
-from dj_shop_cart.cart import get_cart_manager_class
+from dj_shop_cart.cart import get_cart_class
 from django.http import HttpRequest
 from django.views.decorators.http import require_POST
 
 # This function has nothing to do with the package itself
 from .helpers import collect_params
 
-Cart = get_cart_manager_class()
+Cart = get_cart_class()
 
 
 @require_POST
@@ -109,11 +107,12 @@ def empty_cart(request: HttpRequest):
 
 Configure the cart behaviour in your Django settings. All settings are optional.
 
-| Name                   | Type | Description                                                                                                       | Default   |
-|------------------------|------|-------------------------------------------------------------------------------------------------------------------|-----------|
-| CART_SESSION_KEY       | str  | The key used to store the cart in session                                                                            | CART-ID   |
-| CART_MANAGER_CLASS     | str  | The path to a custom **Cart** manager class. The custom class need to be a subclass of **dj_shop_cart.cart.Cart** | None      |
-| CART_PRODUCT_GET_PRICE | str  | The method name to use to dynamically get the price on the product instance                                       | get_price |
+| Name                          | Type | Description                                                                                                                                                          | Default   |
+|-------------------------------|------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
+| CART_SESSION_KEY              | str  | The key used to store the cart in session                                                                                                                            | CART-ID   |
+| CART_CUSTOM_CLASS             | str  | The path to a custom **Cart** class if you define one. The custom class need to be a subclass of **dj_shop_cart.cart.Cart**                                          | None      |
+| CART_PRODUCT_GET_PRICE_METHOD | str  | The method name to use to dynamically get the price on the product instance                                                                                          | get_price |
+| CART_CUSTOM_STORAGE_BACKEND   | str  | The path to a custom storage backend if you define one. The storage backend should follow the **Storage** protocol, see the **Custom storage backend section** below | None      |
 
 ## Development
 
@@ -139,7 +138,6 @@ If you have any feedback, please reach out to me at degnonfrancis@gmail.com
 
 - Add api reference in readme
 - Add Used by section to readme
-- Add a redis storage backend and rework the api for easy integration of custom storage backends
 - More examples
 - Complete the example project
 - Write more tests

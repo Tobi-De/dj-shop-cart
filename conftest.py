@@ -9,6 +9,7 @@ from django.contrib.sessions.backends.base import SessionBase
 from django.test import RequestFactory
 
 from dj_shop_cart.cart import get_cart_class
+from dj_shop_cart.storages import DBStorage, SessionStorage
 from tests.factories import ProductFactory
 
 User = get_user_model()
@@ -24,18 +25,16 @@ def session(settings) -> SessionBase:
 
 @pytest.fixture()
 def cart(rf: RequestFactory, session: SessionBase, settings) -> Cart:
+    settings.CART_STORAGE_BACKEND = "dj_shop_cart.storages.SessionStorage"
     request = rf.get("/")
     request.user = AnonymousUser()
     request.session = session
     return Cart.new(request)
 
 
-# TODO changing the settings directly in the fixture doesn't affect the dj_shop_cart
-#   initialization
-
-
 @pytest.fixture()
-def cart_db(rf: RequestFactory, user: User, session: SessionBase):
+def cart_db(rf: RequestFactory, user: User, session: SessionBase, settings):
+    settings.CART_STORAGE_BACKEND = "dj_shop_cart.storages.DBStorage"
     request = rf.get("/")
     request.user = user
     request.session = session
@@ -69,3 +68,18 @@ def product():
 @pytest.fixture()
 def user(django_user_model: type[User]):
     return django_user_model.objects.create(username="someone", password="password")
+
+
+@pytest.fixture()
+def session_storage(rf: RequestFactory, session: SessionBase):
+    request = rf.get("/")
+    request.session = session
+    return SessionStorage(request)
+
+
+@pytest.fixture()
+def db_storage(rf: RequestFactory, session: SessionBase, user: User):
+    request = rf.get("/")
+    request.session = session
+    request.user = user
+    return DBStorage(request)

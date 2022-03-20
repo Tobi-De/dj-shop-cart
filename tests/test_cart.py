@@ -3,8 +3,6 @@ from __future__ import annotations
 import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
-from django.contrib.sessions.backends.base import SessionBase
-from django.test import RequestFactory
 
 from dj_shop_cart.cart import get_cart_class
 from dj_shop_cart.storages import DBStorage, SessionStorage
@@ -99,19 +97,6 @@ def test_cart_is_empty_session_storage(cart: Cart):
 
 def test_cart_is_empty_db_storage(cart_db):
     cart_is_empty(cart=cart_db)
-
-
-def test_migrate_cart_from_session_to_db(
-    cart: Cart, session: SessionBase, rf: RequestFactory, user: User, product: Product
-):
-    request = rf.get("/")
-    request.user = user
-    request.session = session
-    cart.add(product, quantity=5)
-    assert isinstance(cart.storage, SessionStorage)
-    cart = Cart.new(request)
-    assert isinstance(cart.storage, DBStorage)
-    assert product in cart.products
 
 
 def cart_remove_product(cart: Cart):

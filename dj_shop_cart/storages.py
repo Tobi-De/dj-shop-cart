@@ -1,26 +1,23 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import ClassVar, Optional, cast
 
 from django.http import HttpRequest
 
-from . import conf
-from .protocols import Storage
-from .utils import get_module
+from .conf import conf
 
-if conf.CART_PERSIST_TO_DB:
+if conf.app_is_installed:
     from .models import Cart
-
-
-OptionalStorageType = ClassVar[Optional[type[Storage]]]
 
 
 @dataclass
 class SessionStorage:
+    """
+    Save the cart data to the user session
+    """
+
     request: HttpRequest
     session_key: str = conf.CART_SESSION_KEY
-    depends_on: OptionalStorageType = None
 
     def load(self) -> list[dict]:
         return self.request.session.get(self.session_key, [])
@@ -36,38 +33,32 @@ class SessionStorage:
 
 @dataclass
 class DBStorage:
+    """
+    Save the cart data to the database, use the session for unauthenticated users
+    """
+
     request: HttpRequest
-    depends_on: OptionalStorageType = SessionStorage
 
     def load(self) -> list[dict]:
+        data = SessionStorage(self.request).load()
+        if not self.request.user.is_authenticated:
+            return data
         cart, _ = Cart.objects.get_or_create(
-            customer=self.request.user, defaults={"items": []}
+            customer=self.request.user, defaults={"items": data}
         )
         return cart.items
 
     def save(self, items: list[dict]) -> None:
-        Cart.objects.update_or_create(
-            customer=self.request.user,
-            defaults={"items": items},
-        )
+        if not self.request.user.is_authenticated:
+            SessionStorage(self.request).save(items)
+        else:
+            Cart.objects.update_or_create(
+                customer=self.request.user,
+                defaults={"items": items},
+            )
 
     def clear(self) -> None:
-        Cart.objects.filter(customer=self.request.user).delete()
-
-
-def storage_factory(request: HttpRequest, storage_class: type[Storage]) -> Storage:
-    storage = storage_class(request)  # noqa
-    if not storage_class.depends_on:
-        return storage
-    data = storage_class.depends_on(request).load()
-    if data:
-        storage.save(data)
-    return storage
-
-
-def get_storage_class(request: HttpRequest) -> type[Storage]:
-    if conf.CART_CUSTOM_STORAGE_BACKEND:
-        return cast(type[Storage], get_module(conf.CART_CUSTOM_STORAGE_BACKEND))
-    if conf.CART_PERSIST_TO_DB and request.user.is_authenticated:
-        return DBStorage
-    return SessionStorage
+        if not self.request.user.is_authenticated:
+            SessionStorage(self.request).clear()
+        else:
+            Cart.objects.filter(customer=self.request.user).delete()

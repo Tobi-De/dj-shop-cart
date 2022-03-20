@@ -9,9 +9,8 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 from django.http import HttpRequest
 
-from . import conf
+from .conf import conf
 from .protocols import Storage
-from .storages import get_storage_class, storage_factory
 from .utils import get_module
 
 __all__ = ("Cart", "CartItem", "get_cart_class")
@@ -30,7 +29,7 @@ class CartItem:
 
     @property
     def product(self) -> Product:
-        ProductClass: type[Product] = get_module(self.product_class_path)  # noqa
+        ProductClass: type[Product] = get_module(self.product_class_path)
         return ProductClass.objects.get(pk=self.product_pk)
 
     @property
@@ -230,9 +229,8 @@ class Cart:
     @classmethod
     def new(cls, request: HttpRequest) -> Cart:
         """Appropriately create a new cart instance. This builder load existing cart if needed."""
-        storage_class = get_storage_class(request)
-        storage = storage_factory(request=request, storage_class=storage_class)  # noqa
-        instance = cls(request=request, storage=storage)  # noqa
+        storage = get_module(conf.CART_STORAGE_BACKEND)(request)
+        instance = cls(request=request, storage=storage)
         instance._items = [CartItem(**item) for item in storage.load()]
         return instance
 
@@ -241,11 +239,9 @@ def get_cart_class() -> type[Cart]:
     """
     Returns the correct cart manager class
     """
-    if not conf.CART_CUSTOM_CLASS:
-        return Cart
-    klass = get_module(conf.CART_CUSTOM_CLASS)
+    klass = get_module(conf.CART_CLASS)
     if not issubclass(klass, Cart):
         raise ImproperlyConfigured(
-            "The `CART_CUSTOM_CLASS` settings must be a subclass of the `Cart` class."
+            "The `CART_CLASS` settings must be a subclass of the `Cart` class."
         )
     return klass

@@ -18,6 +18,7 @@ A simple and flexible cart manager for your django projects.
 - Metadata data can be attached to cart items
 - Supports specification of product variation details
 - Available context processor for easy access to the user cart in all your django templates
+- Swappable backend storage, with session and database provided by default
 
 
 ## Installation
@@ -33,12 +34,6 @@ Install **dj-shop-cart** with pip or poetry.
 ```python3
 
 # settings.py
-
-INSTALLED_APPS = [
-    ...,
-    "dj_shop_cart", # If you want the cart to be stored in the database when users are authenticated
-    ...,
-]
 
 TEMPLATES = [
     {
@@ -105,14 +100,28 @@ def empty_cart(request: HttpRequest):
 
 ## Configuration
 
-Configure the cart behaviour in your Django settings. All settings are optional.
+Configure the cart behaviour in your Django settings. All settings are optional and must be strings if defined.
 
-| Name                          | Type | Description                                                                                                                                                          | Default   |
-|-------------------------------|------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------|
-| CART_SESSION_KEY              | str  | The key used to store the cart in session                                                                                                                            | CART-ID   |
-| CART_CUSTOM_CLASS             | str  | The path to a custom **Cart** class if you define one. The custom class need to be a subclass of **dj_shop_cart.cart.Cart**                                          | None      |
-| CART_PRODUCT_GET_PRICE_METHOD | str  | The method name to use to dynamically get the price on the product instance                                                                                          | get_price |
-| CART_CUSTOM_STORAGE_BACKEND   | str  | The path to a custom storage backend if you define one. The storage backend should follow the **Storage** protocol, see the **Custom storage backend section** below | None      |
+| Name                          | Description                                                                                                                                                          | Default                              |
+|-------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------|
+| CART_SESSION_KEY              | The key used to store the cart in session                                                                                                                            | CART-ID                              |
+| CART_CLASS                    | The path to the **Cart** class to use. If you are using a custom class it must subclass **dj_shop_cart.cart.Cart**                                                   | dj_shop_cart.cart.Cart               |
+| CART_PRODUCT_GET_PRICE_METHOD | The method name to use to dynamically get the price on the product instance                                                                                          | get_price                            |
+| CART_STORAGE_BACKEND          | The path to the storage backend to use. If you define a custom storage backend, it should follow the **Storage** protocol, see the **Backend Storage section** below | dj_shop_cart.storages.SessionStorage |
+
+## API reference
+
+**TODO**
+
+## Storage Backend
+
+**TODO**
+
+## Used By
+
+This project is used by the following companies:
+
+- [Fêmy bien être](https://www.femybienetre.com/)
 
 ## Development
 
@@ -136,8 +145,7 @@ If you have any feedback, please reach out to me at degnonfrancis@gmail.com
 
 ## Todos
 
-- Add api reference in readme
-- Add Used by section to readme
 - More examples
+- Add an example for a custom redis backend
 - Complete the example project
 - Write more tests

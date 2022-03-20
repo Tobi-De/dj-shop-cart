@@ -15,10 +15,6 @@ Cart = get_cart_class()
 User = get_user_model()
 
 
-# TODO test with custom dj_shop_cart manager class
-#   test with variants
-
-
 def test_cart_init_session_storage(cart: Cart):
     assert isinstance(cart.storage, SessionStorage)
     assert len(cart) == cart.unique_count == cart.count == 0
@@ -185,6 +181,3 @@ def test_cart_custom_manager(rf, session, custom_cart_manager, product):
     item = cart.remove(product)
     assert "before_remove" in item.metadata["hooks"]
     assert "after_remove" in item.metadata["hooks"]
-
-
-# todo write test to try loading data from previously saved db data

@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from typing import Protocol, runtime_checkable
+from typing import Protocol
 
 from django.http import HttpRequest
 
 
-@runtime_checkable
 class Storage(Protocol):
     request: HttpRequest
 

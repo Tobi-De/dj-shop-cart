@@ -132,8 +132,8 @@ class Cart:
         *,
         quantity: int = 1,
         variant: Variant | None = None,
-        metadata: dict | None = None,
         override_quantity: bool = False,
+        metadata: dict | None = None,
     ) -> CartItem:
         """
         Add a new item to the cart
@@ -141,10 +141,10 @@ class Cart:
         :param product: An instance of a database product
         :param quantity: The quantity that will be added to the dj_shop_cart
         :param variant:  Variant details of the product
+        :param override_quantity: If true will overwrite the quantity of the item if it already exists
         :param metadata: Optional metadata that is attached to the item, this dictionary can contain
             anything that you would want to attach to the created item in cart, the only requirements about
             it is that it needs to be json serializable
-        :param override_quantity: If true will overwrite the quantity of the item if it already exists
         :return: An instance of the item added
         """
         quantity = int(quantity)

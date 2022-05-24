@@ -323,8 +323,6 @@ If you have any feedback, please reach out to me at degnonfrancis@gmail.com
 
 ## Todos
 
-- More examples
-- Add redis storage
 - Add an example for a custom redis backend
 - Complete the example project
 - Write more tests

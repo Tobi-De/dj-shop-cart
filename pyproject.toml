@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dj-shop-cart"
-version = "4.0.0"
+version = "4.0.1"
 description = "Simple django cart manager for your django projects."
 authors = ["Tobi DEGNON <tobidegnon@protonmail.com>"]
 license = "MIT"
@@ -8,7 +8,7 @@ readme = "README.md"
 repository = "https://github.com/Tobi-De/dj-shop-cart"
 homepage = "https://github.com/Tobi-De/dj-shop-cart"
 keywords = ["django", "python", "cart", "shop", "ecommerce"]
-packages=[
+packages = [
     { include = "dj_shop_cart" },
     { include = "dj_shop_cart/migrations" },
 ]
@@ -24,19 +24,20 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
-Django = "4.0.3"
+Django = ">=3.2,<5.0"
 attrs = "^21.4.0"
 
 [tool.poetry.dev-dependencies]
-pytest = "^7.1.1"
+pytest = "^7.1.2"
 pytest-django = "^4.5.2"
 mypy = "^0.942"
-pre-commit = "^2.18.1"
+pre-commit = "^2.19.0"
 black = "^22.3.0"
+isort = "^5.10.1"
 django-stubs = "^1.10.1"
 factory-boy = "^3.2.1"
-ipython = "^8.2.0"
-poetryup = "^0.6.1"
+ipython = "^8.3.0"
+poetryup = "^0.7.1"
 
 [tool.black]
 target-version = ['py37']

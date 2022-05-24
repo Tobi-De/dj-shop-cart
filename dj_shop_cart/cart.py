@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import itertools
 from decimal import Decimal
-from typing import Iterator, TypeVar, Union
+from typing import Iterator, Type, TypeVar, Union, cast
 
 from attrs import Factory, asdict, define, field
 from django.core.exceptions import ImproperlyConfigured
@@ -15,7 +15,7 @@ from .utils import get_module
 
 __all__ = ("Cart", "CartItem", "get_cart_class")
 
-Product = TypeVar("Product", bound=models.Model)
+ProductModel = TypeVar("ProductModel", bound=models.Model)
 Variant = Union[str, int, dict, set]
 
 
@@ -24,13 +24,13 @@ class CartItem:
     quantity: int = field(eq=False, converter=int)
     variant: Variant | None = field(default=None)
     product_pk: str = field(converter=str)
-    product_class_path: str
+    product_model_path: str
     metadata: dict = field(factory=dict, eq=False)
 
     @property
-    def product(self) -> Product:
-        ProductClass: type[Product] = get_module(self.product_class_path)
-        return ProductClass.objects.get(pk=self.product_pk)
+    def product(self) -> ProductModel:
+        model = cast(Type[ProductModel], get_module(self.product_model_path))
+        return model.objects.get(pk=self.product_pk)
 
     @property
     def subtotal(self) -> Decimal:
@@ -43,22 +43,19 @@ class CartItem:
     @classmethod
     def from_product(
         cls,
-        product: Product,
+        product: ProductModel,
         /,
         *,
         quantity: int,
         variant: Variant | None = None,
         metadata: dict | None = None,
     ) -> CartItem:
-        product_class_path = (
-            f"{product.__class__.__module__}.{product.__class__.__name__}"
-        )
         metadata = metadata or {}
         return cls(
             quantity=quantity,
             variant=variant,
             product_pk=product.pk,
-            product_class_path=product_class_path,
+            product_model_path=f"{product.__class__.__module__}.{product.__class__.__name__}",
             metadata=metadata,
         )
 
@@ -101,7 +98,7 @@ class Cart:
         return len(self._items)
 
     @property
-    def products(self) -> list[Product]:
+    def products(self) -> list[ProductModel]:
         """
         The list of associated products.
         """
@@ -128,7 +125,7 @@ class Cart:
 
     def add(
         self,
-        product: Product,
+        product: ProductModel,
         *,
         quantity: int = 1,
         variant: Variant | None = None,
@@ -166,7 +163,7 @@ class Cart:
 
     def remove(
         self,
-        product: Product,
+        product: ProductModel,
         *,
         quantity: int | None = None,
         variant: Variant | None = None,

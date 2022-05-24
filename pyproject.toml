@@ -24,7 +24,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
-Django = ">=3.2,<5.0"
+Django = ">=3.0,<5.0"
 attrs = "^21.4.0"
 
 [tool.poetry.dev-dependencies]

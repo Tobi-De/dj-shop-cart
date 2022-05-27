@@ -321,6 +321,12 @@ pytest
 
 If you have any feedback, please reach out to me at degnonfrancis@gmail.com
 
+## Credits
+
+Thanks to [Jetbrains](https://jb.gg/OpenSource) for providing an Open Source license for this project.
+
+![JetBrains Logo (Main) logo](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png)
+
 ## Todos
 
 - Add an example for a custom redis backend

@@ -434,7 +434,7 @@ testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "poetryup"
-version = "0.7.1"
+version = "0.8.1"
 description = "Update dependencies and bump their version in the pyproject.toml file"
 category = "dev"
 optional = false
@@ -442,7 +442,7 @@ python-versions = ">=3.6,<4.0"
 
 [package.dependencies]
 packaging = ">=21.3,<22.0"
-tomlkit = ">=0.8.0,<0.9.0"
+tomlkit = ">=0.11.0,<0.12.0"
 typer = ">=0.4.1,<0.5.0"
 
 [[package]]
@@ -623,7 +623,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "tomlkit"
-version = "0.8.0"
+version = "0.11.0"
 description = "Style preserving TOML library"
 category = "dev"
 optional = false
@@ -718,7 +718,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "c049d7d539b025fe06ae68853917fad5a61e725945f904e25ca47e617f41e810"
+content-hash = "70ff40d01024e1a76455848cb801afd7e9c86faa568428e0c502479bac88807e"
 
 [metadata.files]
 appnope = [
@@ -922,8 +922,8 @@ pluggy = [
     {file = "pluggy-1.0.0.tar.gz", hash = "sha256:4224373bacce55f955a878bf9cfa763c1e360858e330072059e10bad68531159"},
 ]
 poetryup = [
-    {file = "poetryup-0.7.1-py3-none-any.whl", hash = "sha256:6f64c7d3fea1b30389625ff9a54389a598ad7101d40c951181342b8ed89778d7"},
-    {file = "poetryup-0.7.1.tar.gz", hash = "sha256:74c8c2c377cc04856e4e64362a66edbbd2c8a97f8c67b4ee10681e88f2af5f3a"},
+    {file = "poetryup-0.8.1-py3-none-any.whl", hash = "sha256:75c1805033b740dceea25cd4bcb69361da463696af69443322cc4c872efff7e9"},
+    {file = "poetryup-0.8.1.tar.gz", hash = "sha256:a016c1f13bb2e0bba3a75c4acd0ee7f2b22d16f3f265f30b24d75a4f4b4d8839"},
 ]
 pre-commit = [
     {file = "pre_commit-2.19.0-py2.py3-none-any.whl", hash = "sha256:10c62741aa5704faea2ad69cb550ca78082efe5697d6f04e5710c3c229afdd10"},
@@ -1021,8 +1021,8 @@ tomli = [
     {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
 ]
 tomlkit = [
-    {file = "tomlkit-0.8.0-py3-none-any.whl", hash = "sha256:b824e3466f1d475b2b5f1c392954c6cb7ea04d64354ff7300dc7c14257dc85db"},
-    {file = "tomlkit-0.8.0.tar.gz", hash = "sha256:29e84a855712dfe0e88a48f6d05c21118dbafb283bb2eed614d46f80deb8e9a1"},
+    {file = "tomlkit-0.11.0-py3-none-any.whl", hash = "sha256:0f4050db66fd445b885778900ce4dd9aea8c90c4721141fde0d6ade893820ef1"},
+    {file = "tomlkit-0.11.0.tar.gz", hash = "sha256:71ceb10c0eefd8b8f11fe34e8a51ad07812cb1dc3de23247425fbc9ddc47b9dd"},
 ]
 traitlets = [
     {file = "traitlets-5.2.1.post0-py3-none-any.whl", hash = "sha256:f44b708d33d98b0addb40c29d148a761f44af740603a8fd0e2f8b5b27cf0f087"},

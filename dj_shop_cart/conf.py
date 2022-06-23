@@ -13,6 +13,11 @@ class Settings:
         return getattr(settings, "CART_SESSION_KEY", "CART-ID")
 
     @property
+    def CART_CACHE_TIMEOUT(self) -> int:
+        # default to 5 days
+        return getattr(settings, "CART_CACHE_TIMEOUT", 60 * 60 * 24 * 5)
+
+    @property
     def CART_CLASS(self) -> str:
         return getattr(settings, "CART_CLASS", "dj_shop_cart.cart.Cart")
 

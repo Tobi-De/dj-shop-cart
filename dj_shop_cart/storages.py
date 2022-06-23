@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from django.core.cache import cache
 from django.http import HttpRequest
 
 from .conf import conf
@@ -27,7 +28,7 @@ class SessionStorage:
         self.request.session.modified = True
 
     def clear(self) -> None:
-        self.request.session[self.session_key] = []
+        del self.request.session[self.session_key]
         self.request.session.modified = True
 
 
@@ -62,3 +63,30 @@ class DBStorage:
             SessionStorage(self.request).clear()
         else:
             Cart.objects.filter(customer=self.request.user).delete()
+
+
+@dataclass
+class CacheStorage:
+    """Use django cache backend to store cart details"""
+
+    request: HttpRequest
+    timeout: int = conf.CART_CACHE_TIMEOUT
+    _cache_key: str = conf.CART_SESSION_KEY
+
+    @property
+    def _cart_id(self) -> str:
+        id_ = (
+            str(self.request.user.pk)
+            if self.request.user.is_authenticated
+            else str(self.request.session.session_key)
+        )
+        return f"{self._cache_key}-{id_}"
+
+    def load(self) -> list[dict]:
+        return cache.get(self._cart_id, [])
+
+    def save(self, items: list[dict]) -> None:
+        cache.set(self._cart_id, items, timeout=self.timeout)
+
+    def clear(self) -> None:
+        cache.delete(self._cart_id)

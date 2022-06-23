@@ -9,7 +9,7 @@ from django.contrib.sessions.backends.base import SessionBase
 from django.test import RequestFactory
 
 from dj_shop_cart.cart import get_cart_class
-from dj_shop_cart.storages import DBStorage, SessionStorage
+from dj_shop_cart.storages import CacheStorage, DBStorage, SessionStorage
 from tests.factories import ProductFactory
 
 User = get_user_model()
@@ -83,3 +83,18 @@ def db_storage(rf: RequestFactory, session: SessionBase, user: User):
     request.session = session
     request.user = user
     return DBStorage(request)
+
+
+@pytest.fixture()
+def cache_storage_auth(rf: RequestFactory, user: User):
+    request = rf.get("/")
+    request.user = user
+    return CacheStorage(request)
+
+
+@pytest.fixture()
+def cache_storage(rf: RequestFactory, session: SessionBase):
+    request = rf.get("/")
+    request.user = AnonymousUser()
+    request.session = session
+    return CacheStorage(request)

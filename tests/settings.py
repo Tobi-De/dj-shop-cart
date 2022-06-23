@@ -12,6 +12,12 @@ DATABASES: dict[str, dict[str, Any]] = {
     }
 }
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
+    }
+}
 
 INSTALLED_APPS = [
     "django.contrib.auth",

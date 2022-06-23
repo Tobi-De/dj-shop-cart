@@ -783,7 +783,7 @@ sessions. This backend stores the cart details using <a href="https://docs.djang
 much faster than <strong>SessionStorage</strong> and <strong>DBStorage</strong> which are both database dependent. There are a few things to keep in mind when using this backend:</p>
 <ul>
 <li>This backend storage handles both authenticated and unauthenticated users.</li>
-<li>Authenticated users' cart details are retained after the end of the current user's session but there is no way to identify that a cart belongs to a specific unauthenticated user between sessions, so if an unauthenticated user lives without login-in the cart data is lost.</li>
+<li>Unauthenticated users' cart details are retained after the end of the current user's session but there is no way to identify that a cart belongs to a specific unauthenticated user between sessions, so if an unauthenticated user lives without login-in the cart data is lost.</li>
 <li>There is a timeout after which the data in a cart will be automatically deleted, the default value is 5 days, and it can be configured with the <strong>CART_CACHE_TIMEOUT</strong> settings.</li>
 </ul>
 <h4 id="dbstorage">DBStorage<a class="headerlink" href="#dbstorage" title="Permanent link">&para;</a></h4>

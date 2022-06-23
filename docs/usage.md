@@ -163,7 +163,7 @@ sessions. This backend stores the cart details using [Django's cache framework w
 much faster than **SessionStorage** and **DBStorage** which are both database dependent. There are a few things to keep in mind when using this backend:
 
 - This backend storage handles both authenticated and unauthenticated users.
-- Authenticated users' cart details are retained after the end of the current user's session but there is no way to identify that a cart belongs to a specific unauthenticated user between sessions, so if an unauthenticated user lives without login-in the cart data is lost.
+- Unauthenticated users' cart details are retained after the end of the current user's session but there is no way to identify that a cart belongs to a specific unauthenticated user between sessions, so if an unauthenticated user lives without login-in the cart data is lost.
 - There is a timeout after which the data in a cart will be automatically deleted, the default value is 5 days, and it can be configured with the **CART_CACHE_TIMEOUT** settings.
 
 ### DBStorage

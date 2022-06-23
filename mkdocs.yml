@@ -22,7 +22,7 @@ nav:
   - contributing.md
   - Code of Conduct: codeofconduct.md
   - license.md
-  - Changelog: https://github.com/Tobi-De/fastapi-storages/releases
+  - Changelog: https://github.com/Tobi-De/dj-shop-cart/releases
 
 plugins:
   - include-markdown

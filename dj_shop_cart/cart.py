@@ -3,6 +3,7 @@ from __future__ import annotations
 import itertools
 from decimal import Decimal
 from typing import Iterator, Type, TypeVar, Union, cast
+from uuid import uuid4
 
 from attrs import Factory, asdict, define, field
 from django.core.exceptions import ImproperlyConfigured
@@ -21,6 +22,7 @@ Variant = Union[str, int, dict, set]
 
 @define(kw_only=True)
 class CartItem:
+    id: str = field(factory=uuid4, converter=str)
     quantity: int = field(eq=False, converter=int)
     variant: Variant | None = field(default=None)
     product_pk: str = field(converter=str)
@@ -163,23 +165,21 @@ class Cart:
 
     def remove(
         self,
-        product: ProductModel,
+        item_id: str,
         *,
         quantity: int | None = None,
-        variant: Variant | None = None,
     ) -> CartItem | None:
         """
         Remove an item from the cart entirely or partially based on the quantity
 
-        :param product: An instance of a database product
+        :param item_id: The cart item id
         :param quantity: The quantity of the product to remove from the cart
-        :param variant: Variant details of the product
         :return: The removed item with an updated quantity or None
         """
-        item = self.find_one(product=product, variant=variant)
-        self.before_remove(item=item, quantity=quantity)
+        item = self.find_one(id=item_id)
         if not item:
             return None
+        self.before_remove(item=item, quantity=quantity)
         if quantity:
             item.quantity -= int(quantity)
         else:

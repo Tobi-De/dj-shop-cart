@@ -97,13 +97,11 @@ def test_cart_is_empty_db_storage(cart_db):
 
 def cart_remove_product(cart: Cart):
     product = ProductFactory()
-    cart.remove(product, quantity=1)
-    assert cart.is_empty
-    cart.add(product, quantity=10)
+    item = cart.add(product, quantity=10)
     assert cart.count == 10
-    cart.remove(product, quantity=2)
+    cart.remove(item.id, quantity=2)
     assert cart.count == 8
-    cart.remove(product)
+    cart.remove(item.id)
     assert cart.is_empty
 
 
@@ -178,6 +176,6 @@ def test_cart_custom_manager(rf, session, custom_cart_manager, product):
     item = cart.add(product)
     assert "before_add" in item.metadata["hooks"]
     assert "after_add" in item.metadata["hooks"]
-    item = cart.remove(product)
+    item = cart.remove(item.id)
     assert "before_remove" in item.metadata["hooks"]
     assert "after_remove" in item.metadata["hooks"]

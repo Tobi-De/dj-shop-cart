@@ -142,6 +142,7 @@ The 4 methods defined in the class above are custom hooks that you can override 
 
 ### Properties of `CartItem`
 
+- **id** : A unique id for the item.
 - **price** : The item price calculated via the `get_price` method.
 - **subtotal** : Item price x quantity.
 - **product** : The associated product.

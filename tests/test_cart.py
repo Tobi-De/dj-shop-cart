@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import uuid
+
 import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
@@ -103,6 +105,18 @@ def cart_remove_product(cart: Cart):
     assert cart.count == 8
     cart.remove(item.id)
     assert cart.is_empty
+
+
+def test_cart_increase_quantity(cart: Cart):
+    product = ProductFactory()
+    item = cart.add(product, quantity=10)
+    item = cart.increase(item.id, quantity=10)
+    assert item.quantity == 20
+
+
+def test_cart_increase_quantity_fake_item(cart: Cart):
+    item = cart.increase(str(uuid.uuid4()), quantity=10)
+    assert item is None
 
 
 def test_cart_remove_session_storage(cart: Cart):

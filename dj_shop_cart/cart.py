@@ -147,7 +147,9 @@ class Cart:
         :return: An instance of the item added
         """
         quantity = int(quantity)
-        assert quantity >= 1, f"Item quantity must be greater than 1: {quantity}"
+        assert (
+            quantity >= 1
+        ), f"Item quantity must be greater than or equal to 1: {quantity}"
         item = self.find_one(product=product, variant=variant)
         if not item:
             item = CartItem.from_product(
@@ -159,6 +161,20 @@ class Cart:
             item.quantity = quantity
         else:
             item.quantity += quantity
+        self.after_add(item=item)
+        self.save()
+        return item
+
+    def increase(self, item_id: str, quantity: int = 1) -> CartItem | None:
+        quantity = int(quantity)
+        assert (
+            quantity >= 1
+        ), f"Item quantity must be greater than or equal to 1: {quantity}"
+        item = self.find_one(id=item_id)
+        self.before_add(item=item, quantity=quantity)
+        if not item:
+            return None
+        item.quantity += quantity
         self.after_add(item=item)
         self.save()
         return item

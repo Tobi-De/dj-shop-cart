@@ -70,16 +70,17 @@ class Product(models.Model):
 from dj_shop_cart.cart import get_cart_class
 from django.http import HttpRequest
 from django.views.decorators.http import require_POST
+from django.shortcuts import get_object_or_404
 
-# This function has nothing to do with the package itself
-from .helpers import collect_params
+from .models import Product
 
 Cart = get_cart_class()
 
 
 @require_POST
-def add_product(request: HttpRequest):
-    product, quantity = collect_params(request)
+def add_product(request: HttpRequest, product_id:int):
+    product = get_object_or_404(Product.objects.all(), pk=product_id)
+    quantity = int(request.POST.get("quantity"))
     cart = Cart.new(request)
     cart.add(product, quantity=quantity)
     ...
@@ -87,9 +88,10 @@ def add_product(request: HttpRequest):
 
 @require_POST
 def remove_product(request: HttpRequest):
-    product, quantity = collect_params(request)
+    item_id = request.POST.get("item_id")
+    quantity = int(request.POST.get("quantity"))
     cart = Cart.new(request)
-    cart.remove(product, quantity=quantity)
+    cart.remove(item_id=item_id, quantity=quantity)
     ...
 
 

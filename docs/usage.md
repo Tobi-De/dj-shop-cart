@@ -46,18 +46,35 @@ Parameters
 
 Returns a `CartItem`.
 
+### Increase an item quantity
+
+```python
+cart.increase(item_id, quantity=20)
+```
+
+This method increase the quantity of an item that is already in the cart. It triggers the same `before_add`
+and `after_add` hooks as the `cart.add` method. You can think of this as a shortcut to `cart.add` for
+product that are already in the cart.
+
+Parameters
+
+ - **item_id**:  The cart item id.
+ - **quantity**: The quantity to add.
+
+Returns a `CartItem` or `None` if no item to increase was found.
+
 ### Remove / Decrement a product from the cart
 
 ```python
 # Remove 10 from the quantity
-cart.remove(product, quantity=10)
+cart.remove(item_id, quantity=10)
 # Remove the whole item
-cart.remove(product)
+cart.remove(item_id)
 ```
 
 Parameters
 
-- **product** : An instance of a database product.
+- **item_id** : The cart item id.
 - **quantity** :  An optional quantity of the product to remove from the cart.
   Indicate if you do not want to delete the item completely, if the quantity ends up being zero after the quantity is decreased, the item is completely removed.
 - **variant** : Variant details of the product.

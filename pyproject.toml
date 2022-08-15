@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dj-shop-cart"
-version = "4.1.0"
+version = "5.0.0"
 description = "Simple django cart manager for your django projects."
 authors = ["Tobi DEGNON <tobidegnon@protonmail.com>"]
 license = "MIT"
@@ -32,12 +32,12 @@ pytest = "^7.1.2"
 pytest-django = "^4.5.2"
 mypy = "^0.971"
 pre-commit = "^2.20.0"
-black = "^22.3.0"
+black = "^22.6.0"
 isort = "^5.10.1"
 django-stubs = "^1.12.0"
 factory-boy = "^3.2.1"
 ipython = "^8.4.0"
-poetryup = "^0.9.0"
+poetryup = "^0.10.0"
 redis = "^4.3.4"
 hiredis = "^2.0.0"
 

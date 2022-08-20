@@ -22,7 +22,6 @@ class ProductVariant(models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name="variations"
     )
-    size = models.IntegerField()
     color = models.CharField(max_length=255)
     created = models.DateTimeField(default=timezone.now)
     modified = models.DateTimeField(auto_now_add=True)

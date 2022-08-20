@@ -1,0 +1,44 @@
+[
+    {
+        "model": "core.product",
+        "pk": 1,
+        "fields": {
+            "name": "Pants",
+            "description": "Beautiful pants in different colors",
+            "price": "60.00",
+            "created": "2022-08-19T20:37:01Z",
+            "modified": "2022-08-19T20:37:10.263Z"
+        }
+    },
+    {
+        "model": "core.product",
+        "pk": 2,
+        "fields": {
+            "name": "Shirts",
+            "description": "Beautiful unicolored shirts",
+            "price": "15.00",
+            "created": "2022-08-19T20:37:12Z",
+            "modified": "2022-08-19T20:37:24.408Z"
+        }
+    },
+    {
+        "model": "core.productvariant",
+        "pk": 1,
+        "fields": {
+            "product": 1,
+            "color": "red",
+            "created": "2022-08-19T20:37:27Z",
+            "modified": "2022-08-19T20:37:47.106Z"
+        }
+    },
+    {
+        "model": "core.productvariant",
+        "pk": 2,
+        "fields": {
+            "product": 1,
+            "color": "blue",
+            "created": "2022-08-19T20:37:51Z",
+            "modified": "2022-08-19T20:38:04.148Z"
+        }
+    }
+]

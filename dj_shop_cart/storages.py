@@ -28,7 +28,7 @@ class SessionStorage:
         self.request.session.modified = True
 
     def clear(self) -> None:
-        del self.request.session[self.session_key]
+        self.request.session.pop(self.session_key, None)
         self.request.session.modified = True
 
 

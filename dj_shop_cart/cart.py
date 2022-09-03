@@ -72,15 +72,7 @@ class Cart:
         return self.unique_count
 
     def __iter__(self) -> Iterator[CartItem]:
-        for item in self._items:
-            try:
-                _ = item.product
-            except ObjectDoesNotExist:
-                # If the product associated with the item is no longer in the database, we automatically
-                # remove the item from the cart
-                self.remove(item.id)
-                continue
-            yield item
+        yield from self._items
 
     def __contains__(self, item: CartItem) -> bool:
         return item in self
@@ -105,7 +97,7 @@ class Cart:
         """
         The number of unique items in the cart, regardless of the quantity.
         """
-        return len(list(self.__iter__()))
+        return len(self._items)
 
     @property
     def products(self) -> list[ProductModel]:
@@ -215,7 +207,14 @@ class Cart:
         return item
 
     def save(self) -> None:
-        data = [asdict(item) for item in self]
+        data = []
+        for item in self._items:
+            try:
+                _ = item.product
+            except ObjectDoesNotExist:
+                # If the product associated with the item is no longer in the database, we skip it
+                continue
+            data.append(asdict(item))
         self.storage.save(data)
 
     def empty(self) -> None:
@@ -250,7 +249,14 @@ class Cart:
         """Appropriately create a new cart instance. This builder load existing cart if needed."""
         storage = get_module(conf.CART_STORAGE_BACKEND)(request)
         instance = cls(request=request, storage=storage)
-        instance._items = [CartItem(**item) for item in storage.load()]
+        for val in storage.load():
+            try:
+                item = CartItem(**val)
+                _ = item.product
+            except ObjectDoesNotExist:
+                # If the product associated with the item is no longer in the database, we skip it
+                continue
+            instance._items.append(item)
         return instance
 
 

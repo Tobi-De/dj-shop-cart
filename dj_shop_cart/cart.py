@@ -156,6 +156,8 @@ class Cart:
                 product, quantity=0, variant=variant, metadata=metadata
             )
             self._items.append(item)
+        if metadata:
+            item.metadata.update(metadata)
         self.before_add(item=item, quantity=quantity)
         if override_quantity:
             item.quantity = quantity

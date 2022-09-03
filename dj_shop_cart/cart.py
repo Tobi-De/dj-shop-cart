@@ -83,11 +83,11 @@ class Cart:
             yield item
 
     def __contains__(self, item: CartItem) -> bool:
-        return item in self._items
+        return item in self
 
     @property
     def total(self) -> Decimal:
-        return Decimal(sum(item.subtotal for item in self._items))
+        return Decimal(sum(item.subtotal for item in self))
 
     @property
     def is_empty(self) -> bool:
@@ -98,21 +98,21 @@ class Cart:
         """
         The number of items in the cart, that's the sum of quantities.
         """
-        return sum(item.quantity for item in self._items)
+        return sum(item.quantity for item in self)
 
     @property
     def unique_count(self) -> int:
         """
         The number of unique items in the cart, regardless of the quantity.
         """
-        return len(self._items)
+        return len(list(self.__iter__()))
 
     @property
     def products(self) -> list[ProductModel]:
         """
         The list of associated products.
         """
-        return [item.product for item in self._items]
+        return [item.product for item in self]
 
     def find(self, **criteria) -> list[CartItem]:
         """
@@ -122,7 +122,7 @@ class Cart:
         def get_item_dict(item: CartItem) -> dict:
             return {key: getattr(item, key) for key in criteria}
 
-        return [item for item in self._items if get_item_dict(item) == criteria]
+        return [item for item in self if get_item_dict(item) == criteria]
 
     def find_one(self, **criteria) -> CartItem | None:
         """
@@ -215,7 +215,7 @@ class Cart:
         return item
 
     def save(self) -> None:
-        data = [asdict(item) for item in self._items]
+        data = [asdict(item) for item in self]
         self.storage.save(data)
 
     def empty(self) -> None:
@@ -228,9 +228,7 @@ class Cart:
         """
         return {
             key: list(items)
-            for key, items in itertools.groupby(
-                self._items, lambda item: item.product_pk
-            )
+            for key, items in itertools.groupby(self, lambda item: item.product_pk)
         }
 
     def before_add(self, item: CartItem, quantity: int) -> None:

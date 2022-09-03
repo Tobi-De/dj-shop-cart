@@ -81,6 +81,8 @@ Parameters
 
 Returns a `CartItem` or `None` if no item to remove was found.
 
+**Note**: An item is automatically removed from the cart when the associated database product is no longer available (delete from the database).
+
 ### Empty the cart
 
 ```python

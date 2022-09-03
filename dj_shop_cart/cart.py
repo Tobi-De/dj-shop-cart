@@ -6,7 +6,7 @@ from typing import Iterator, Type, TypeVar, Union, cast
 from uuid import uuid4
 
 from attrs import Factory, asdict, define, field
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from django.db import models
 from django.http import HttpRequest
 
@@ -72,7 +72,15 @@ class Cart:
         return self.unique_count
 
     def __iter__(self) -> Iterator[CartItem]:
-        yield from self._items
+        for item in self._items:
+            try:
+                _ = item.product
+            except ObjectDoesNotExist:
+                # If the product associated with the item is no longer in the database, we automatically
+                # remove the item from the cart
+                self.remove(item.id)
+                continue
+            yield item
 
     def __contains__(self, item: CartItem) -> bool:
         return item in self._items

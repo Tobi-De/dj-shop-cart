@@ -171,7 +171,7 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "django-stubs"
-version = "1.12.0"
+version = "1.13.0"
 description = "Mypy stubs for Django"
 category = "dev"
 optional = false
@@ -179,23 +179,23 @@ python-versions = ">=3.7"
 
 [package.dependencies]
 django = "*"
-django-stubs-ext = ">=0.4.0"
-mypy = ">=0.930"
+django-stubs-ext = ">=0.7.0"
+mypy = ">=0.980"
 tomli = "*"
 types-pytz = "*"
 types-PyYAML = "*"
 typing-extensions = "*"
 
 [package.extras]
-compatible-mypy = ["mypy (>=0.930,<0.970)"]
+compatible-mypy = ["mypy (>=0.980,<0.990)"]
 
 [[package]]
 name = "django-stubs-ext"
-version = "0.5.0"
+version = "0.7.0"
 description = "Monkey-patching and extensions for django-stubs"
 category = "dev"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 
 [package.dependencies]
 django = "*"
@@ -785,7 +785,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "6a43b0c3fb677ac97cfc4d204c5aa61139d6ca3fe50af30fab7dc972a6672a51"
+content-hash = "2986a71388ed9724da344a097cb9efdc51abf0f4cc57f831f25a0a5df9a0fd02"
 
 [metadata.files]
 appnope = [
@@ -882,12 +882,12 @@ django = [
     {file = "Django-4.1.3.tar.gz", hash = "sha256:678bbfc8604eb246ed54e2063f0765f13b321a50526bdc8cb1f943eda7fa31f1"},
 ]
 django-stubs = [
-    {file = "django-stubs-1.12.0.tar.gz", hash = "sha256:ea8b35d0da49f7b2ee99a79125f1943e033431dd114726d6643cc35de619230e"},
-    {file = "django_stubs-1.12.0-py3-none-any.whl", hash = "sha256:0dff8ec0ba3abe046450b3d8a29ce9e72629893d2c1ef679189cc2bfdb6d2f64"},
+    {file = "django-stubs-1.13.0.tar.gz", hash = "sha256:424fdd1935f859a802365056f9ccf4db12d1d93a5ab3de6d5633dddba0c5fc76"},
+    {file = "django_stubs-1.13.0-py3-none-any.whl", hash = "sha256:eaecc1fc71532c1148f0c9687556651d880165476d7629bf318ff86a903a150c"},
 ]
 django-stubs-ext = [
-    {file = "django-stubs-ext-0.5.0.tar.gz", hash = "sha256:9bd7418376ab00b7f88d6d56be9fece85bfa0c7c348ac621155fa4d7a91146f2"},
-    {file = "django_stubs_ext-0.5.0-py3-none-any.whl", hash = "sha256:c5d8db53d29c756e7e3d0820a5a079a43bc38d8fab0e1b8bd5df2f3366c54b5a"},
+    {file = "django-stubs-ext-0.7.0.tar.gz", hash = "sha256:4fd8cdbc68d1a421f21bb7e0d9e76d50f6a4b504d350ba786405daf536e90c21"},
+    {file = "django_stubs_ext-0.7.0-py3-none-any.whl", hash = "sha256:d729fbc7fe8970a7e26b35956c35b48502516f011d523c0577bdfb02ed956284"},
 ]
 exceptiongroup = [
     {file = "exceptiongroup-1.0.0rc9-py3-none-any.whl", hash = "sha256:2e3c3fc1538a094aab74fad52d6c33fc94de3dfee3ee01f187c0e0c72aec5337"},

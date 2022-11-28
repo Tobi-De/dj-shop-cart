@@ -37,7 +37,7 @@ isort = "^5.10.1"
 django-stubs = "^1.13.0"
 factory-boy = "^3.2.1"
 ipython = "^8.6.0"
-poetryup = "^0.12.3"
+poetryup = "^0.12.5"
 redis = "^4.3.5"
 hiredis = "^2.0.0"
 

@@ -39,7 +39,7 @@ factory-boy = "^3.2.1"
 ipython = "^8.7.0"
 poetryup = "^0.12.5"
 redis = "^4.4.0"
-hiredis = "^2.0.0"
+hiredis = "^2.1.0"
 
 [tool.black]
 target-version = ['py37']

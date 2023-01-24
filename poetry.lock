@@ -239,14 +239,14 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "django-stubs"
-version = "1.13.1"
+version = "1.13.2"
 description = "Mypy stubs for Django"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "django-stubs-1.13.1.tar.gz", hash = "sha256:bcc618ba353dabc540d982b9dac1d5a1921652f8fc2a13653d545a57d5e3cc0f"},
-    {file = "django_stubs-1.13.1-py3-none-any.whl", hash = "sha256:fbf2ee6a4bce76c3eb5f6707ccadb4cf1c2f1ec485e8c44701ca8de2d0a5df18"},
+    {file = "django-stubs-1.13.2.tar.gz", hash = "sha256:19e97efecfaf80e42c479ee7ed6179f3120c1b2c11e665b2e8305457e41ee069"},
+    {file = "django_stubs-1.13.2-py3-none-any.whl", hash = "sha256:f9edb3ef09ac2a014b111d894d86376a70b447f13fe7905ea6c0752e08a1514a"},
 ]
 
 [package.dependencies]
@@ -1188,4 +1188,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "bdd1f14a488d43c204caba5caed1b84a968a9a788c5a2a4b0c0cd83feb2ba556"
+content-hash = "b205ae2a2c19a101050a9a21515c0c6879c6c9abdcbb1830d2aeab778be7776f"

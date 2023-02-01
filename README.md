@@ -126,7 +126,7 @@ pytest
 
 ## Feedback
 
-If you have any feedback, please reach out to me at degnonfrancis@gmail.com
+If you have any feedback, please reach out to me at tobidegnon@proton.me.
 
 ## Credits
 

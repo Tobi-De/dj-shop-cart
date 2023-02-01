@@ -265,7 +265,12 @@ class Cart:
         """Appropriately create a new cart instance. This builder load existing cart if needed."""
         storage = get_module(conf.CART_STORAGE_BACKEND)(request)
         instance = cls(request=request, storage=storage, prefix=prefix)
-        data = storage.load().get(prefix, [])
+        try:
+            data = storage.load().get(prefix, [])
+        except AttributeError:
+            # this is a hack to support the old storage backend mechanism which was saving everything in a list
+            data = {DEFAULT_CART_PREFIX: storage.load()}
+            storage.clear()
         for val in data:
             try:
                 item = CartItem(**val)

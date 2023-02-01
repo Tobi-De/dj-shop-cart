@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dj-shop-cart"
-version = "5.2.0"
+version = "5.3.0"
 description = "Simple django cart manager for your django projects."
 authors = ["Tobi DEGNON <tobidegnon@protonmail.com>"]
 license = "MIT"

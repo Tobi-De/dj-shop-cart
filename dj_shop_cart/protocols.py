@@ -8,10 +8,10 @@ from django.http import HttpRequest
 class Storage(Protocol):
     request: HttpRequest
 
-    def load(self) -> list[dict]:
+    def load(self) -> dict:
         ...
 
-    def save(self, items: list[dict]) -> None:
+    def save(self, data: dict) -> None:
         ...
 
     def clear(self) -> None:

@@ -33,6 +33,15 @@ def cart(rf: RequestFactory, session: SessionBase, settings) -> Cart:
 
 
 @pytest.fixture()
+def prefixed_cart(rf: RequestFactory, session: SessionBase, settings) -> Cart:
+    settings.CART_STORAGE_BACKEND = "dj_shop_cart.storages.SessionStorage"
+    request = rf.get("/")
+    request.user = AnonymousUser()
+    request.session = session
+    return Cart.new(request, prefix="a")
+
+
+@pytest.fixture()
 def cart_db(rf: RequestFactory, user: User, session: SessionBase, settings):
     settings.CART_STORAGE_BACKEND = "dj_shop_cart.storages.DBStorage"
     request = rf.get("/")

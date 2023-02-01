@@ -193,3 +193,14 @@ def test_cart_custom_manager(rf, session, custom_cart_manager, product):
     item = cart.remove(item.id)
     assert "before_remove" in item.metadata["hooks"]
     assert "after_remove" in item.metadata["hooks"]
+
+
+def test_prefixed_cart(cart: Cart, prefixed_cart: Cart):
+    product = ProductFactory()
+    product_2 = ProductFactory()
+    cart.add(product, quantity=2)
+    prefixed_cart.add(product_2, quantity=2)
+    assert cart.count == 2
+    assert prefixed_cart.count == 2
+    assert product_2 not in cart.products
+    assert product not in prefixed_cart.products

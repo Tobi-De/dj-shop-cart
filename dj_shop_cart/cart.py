@@ -18,6 +18,7 @@ __all__ = ("Cart", "CartItem", "get_cart_class")
 
 ProductModel = TypeVar("ProductModel", bound=models.Model)
 Variant = Union[str, int, dict, set]
+DEFAULT_CART_PREFIX = "default"
 
 
 @define(kw_only=True)
@@ -66,6 +67,7 @@ class CartItem:
 class Cart:
     request: HttpRequest
     storage: Storage
+    prefix: str = field(default=DEFAULT_CART_PREFIX)
     _items: list[CartItem] = Factory(list)
 
     def __len__(self) -> int:
@@ -209,17 +211,29 @@ class Cart:
         return item
 
     def save(self) -> None:
-        data = []
+        items = []
         for item in self._items:
             try:
                 _ = item.product
             except ObjectDoesNotExist:
                 # If the product associated with the item is no longer in the database, we skip it
                 continue
-            data.append(asdict(item))
+            items.append(asdict(item))
+        # load storage old data to avoid overwriting
+        data = self.storage.load()
+        data[self.prefix] = items
         self.storage.save(data)
 
-    def empty(self) -> None:
+    def empty(self, prefix: str = DEFAULT_CART_PREFIX) -> None:
+        self._items = []
+        data = self.storage.load()
+        try:
+            data.pop(prefix)
+        except KeyError:
+            pass
+        self.storage.save(data)
+
+    def empty_all(self) -> None:
         self._items = []
         self.storage.clear()
 
@@ -247,11 +261,12 @@ class Cart:
         pass
 
     @classmethod
-    def new(cls, request: HttpRequest) -> Cart:
+    def new(cls, request: HttpRequest, prefix: str = DEFAULT_CART_PREFIX) -> Cart:
         """Appropriately create a new cart instance. This builder load existing cart if needed."""
         storage = get_module(conf.CART_STORAGE_BACKEND)(request)
-        instance = cls(request=request, storage=storage)
-        for val in storage.load():
+        instance = cls(request=request, storage=storage, prefix=prefix)
+        data = storage.load().get(prefix, [])
+        for val in data:
             try:
                 item = CartItem(**val)
                 _ = item.product

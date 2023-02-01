@@ -20,11 +20,11 @@ class SessionStorage:
     request: HttpRequest
     session_key: str = conf.CART_SESSION_KEY
 
-    def load(self) -> list[dict]:
-        return self.request.session.get(self.session_key, [])
+    def load(self) -> dict:
+        return self.request.session.get(self.session_key, {})
 
-    def save(self, items: list[dict]) -> None:
-        self.request.session[self.session_key] = items
+    def save(self, data: dict) -> None:
+        self.request.session[self.session_key] = data
         self.request.session.modified = True
 
     def clear(self) -> None:
@@ -40,7 +40,7 @@ class DBStorage:
 
     request: HttpRequest
 
-    def load(self) -> list[dict]:
+    def load(self) -> dict:
         data = SessionStorage(self.request).load()
         if not self.request.user.is_authenticated:
             return data
@@ -49,13 +49,13 @@ class DBStorage:
         )
         return cart.items
 
-    def save(self, items: list[dict]) -> None:
+    def save(self, data: dict) -> None:
         if not self.request.user.is_authenticated:
-            SessionStorage(self.request).save(items)
+            SessionStorage(self.request).save(data)
         else:
             Cart.objects.update_or_create(
                 customer=self.request.user,
-                defaults={"items": items},
+                defaults={"items": data},
             )
 
     def clear(self) -> None:
@@ -83,10 +83,10 @@ class CacheStorage:
         return f"{self._cache_key}-{id_}"
 
     def load(self) -> list[dict]:
-        return cache.get(self._cart_id, [])
+        return cache.get(self._cart_id, {})
 
-    def save(self, items: list[dict]) -> None:
-        cache.set(self._cart_id, items, timeout=self.timeout)
+    def save(self, data: dict) -> None:
+        cache.set(self._cart_id, data, timeout=self.timeout)
 
     def clear(self) -> None:
         cache.delete(self._cart_id)

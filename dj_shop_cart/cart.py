@@ -269,7 +269,7 @@ class Cart:
             data = storage.load().get(prefix, [])
         except AttributeError:
             # this is a hack to support the old storage backend mechanism which was saving everything in a list
-            data = {DEFAULT_CART_PREFIX: storage.load()}
+            data = storage.load()
             storage.clear()
         for val in data:
             try:

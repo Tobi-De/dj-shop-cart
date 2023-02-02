@@ -98,13 +98,20 @@ def my_view(request):
     # by looping through the cart, we return all the CartItem objects.
     for item in cart:
         print(item.subtotal)
-
-    item = cart.find()[0]
-    # you can use the in operator to check if a CartItem is in the basket, perhaps for a manually built one.
+    
+    # find items based on product_pk, cart item id, variant details, quantity, etc.
+    item = cart.find_one(product_pk=1)[0]
     assert item in cart
-
+    
+    # the number of items in the cart
+    print(cart.count)
+    
+    # the number of unique items
+    print(cart.unique_count)
+    
     # calling len on the cart returns the number of unique items in the cart, regardless of the quantity.
     print(len(cart))
+
 ```
 
 - **total** : The total cost of the cart.
@@ -116,6 +123,32 @@ def my_view(request):
 - **find_one(\*\*criteria)** : Returns the first cart item that matches the given criteria, if no match is found return None.
 - **variants_group_by_product()** :  Return a dictionary with the products ids as keys and a list of variant as values.
 
+## Multiple Carts
+
+You can manage multiple carts at the same time with the same storage using the `prefix` argument of the `Cart.new` method.
+
+```python
+cart_a = Cart.new(request, prefix="cart_a")
+cart_a.add(product_a, quantity=10)
+assert product_a in cart_a
+
+cart_b = Cart.new(request, prefix="cart_b")
+cart_b.add(product_b, quantity=10)
+assert product_b in cart_b
+
+assert product_a not in cart_b
+assert product_b not in cart_a
+```
+A little tip if you don't want to have to remember to pass the right prefix each time you instantiate a new cart, 
+use the `partial` method from the `functools` module.
+
+```python
+from functools import partial
+
+get_cart_a = partial(Cart.new, prefix="cart_a")
+cart_a = get_cart_a(request)
+cart_a.add(product_a, quantity=10)
+```
 ### Custom Cart Class
 
 ````python

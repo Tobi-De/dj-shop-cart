@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import itertools
 from decimal import Decimal
 from typing import Iterator, Type, TypeVar, Union, cast
@@ -68,6 +69,7 @@ class Cart:
     request: HttpRequest
     storage: Storage
     prefix: str = field(default=DEFAULT_CART_PREFIX)
+    metadata: dict = field(factory=dict)
     _items: list[CartItem] = Factory(list)
 
     def __len__(self) -> int:
@@ -221,16 +223,14 @@ class Cart:
             items.append(asdict(item))
         # load storage old data to avoid overwriting
         data = self.storage.load()
-        data[self.prefix] = items
+        data[self.prefix] = {"items": items, "metadata": self.metadata}
         self.storage.save(data)
 
     def empty(self, prefix: str = DEFAULT_CART_PREFIX) -> None:
         self._items = []
         data = self.storage.load()
-        try:
+        with contextlib.suppress(KeyError):
             data.pop(prefix)
-        except KeyError:
-            pass
         self.storage.save(data)
 
     def empty_all(self) -> None:
@@ -266,12 +266,14 @@ class Cart:
         storage = get_module(conf.CART_STORAGE_BACKEND)(request)
         instance = cls(request=request, storage=storage, prefix=prefix)
         try:
-            data = storage.load().get(prefix, [])
+            data = storage.load().get(prefix, {})
         except AttributeError:
-            # this is a hack to support the old storage backend mechanism which was saving everything in a list
-            data = storage.load()
+            # fixme this is a hack to support the old storage backend mechanism which was saving everything in a list
+            data = {"items": storage.load(), "metadata": {}}
             storage.clear()
-        for val in data:
+        metadata = data.pop("metadata", {})
+        items = data.pop("items", [])
+        for val in items:
             try:
                 item = CartItem(**val)
                 _ = item.product
@@ -279,6 +281,7 @@ class Cart:
                 # If the product associated with the item is no longer in the database, we skip it
                 continue
             instance._items.append(item)
+        instance.metadata.update(metadata)
         return instance
 
 

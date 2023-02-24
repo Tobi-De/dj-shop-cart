@@ -30,15 +30,15 @@ attrs = ">=21.4,<23.0"
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.1"
 pytest-django = "^4.5.2"
-mypy = "^0.991"
-pre-commit = "^3.0.2"
+mypy = "^1.0"
+pre-commit = "^3.0.4"
 black = "^23.1.0"
 isort = "^5.12.0"
-django-stubs = "^1.14.0"
+django-stubs = "^1.15.0"
 factory-boy = "^3.2.1"
-ipython = "^8.9.0"
-redis = "^4.4.2"
-hiredis = "^2.1.1"
+ipython = "^8.10.0"
+redis = "^4.5.1"
+hiredis = "^2.2.1"
 
 [tool.black]
 target-version = ['py37']

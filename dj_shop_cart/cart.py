@@ -275,8 +275,8 @@ class Cart:
             # fixme this is a hack to support the old storage backend mechanism which was saving everything in a list
             data = {"items": storage.load(), "metadata": {}}
             storage.clear()
-        metadata = data.pop("metadata", {})
-        items = data.pop("items", [])
+        metadata = data.get("metadata", {})
+        items = data.get("items", [])
         for val in items:
             try:
                 item = CartItem(**val)

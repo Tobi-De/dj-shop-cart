@@ -271,6 +271,9 @@ class Cart:
         instance = cls(request=request, storage=storage, prefix=prefix)
         try:
             data = storage.load().get(prefix, {})
+            if isinstance(data, list):
+                # fixme this is a hack to support the old storage backend mechanism which was saving everything in a list
+                data = {"items": data, "metadata": {}}
         except AttributeError:
             # fixme this is a hack to support the old storage backend mechanism which was saving everything in a list
             data = {"items": storage.load(), "metadata": {}}

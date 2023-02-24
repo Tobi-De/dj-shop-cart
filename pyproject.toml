@@ -38,7 +38,7 @@ django-stubs = "^1.15.0"
 factory-boy = "^3.2.1"
 ipython = "^8.10.0"
 redis = "^4.5.1"
-hiredis = "^2.2.1"
+hiredis = "^2.2.2"
 
 [tool.black]
 target-version = ['py37']

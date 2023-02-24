@@ -260,6 +260,10 @@ class Cart:
     def after_remove(self, item: CartItem | None = None) -> None:
         pass
 
+    def update_metadata(self, metadata: dict) -> None:
+        self.metadata.update(metadata)
+        self.save()
+
     @classmethod
     def new(cls, request: HttpRequest, prefix: str = DEFAULT_CART_PREFIX) -> Cart:
         """Appropriately create a new cart instance. This builder load existing cart if needed."""

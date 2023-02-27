@@ -119,6 +119,8 @@ def my_view(request):
 - **count** :  The number of items in the cart, that's the sum of quantities.
 - **unique_count** : The number of unique items in the cart, regardless of the quantity.
 - **products** : A list of associated products.
+- **metadata** : A dictionary containing the metadata of the cart.
+- **update_metadata(metadata:dict)** : Update the metadata of the cart.
 - **find(\*\*criteria)** : Returns a list of cart items matching the given criteria.
 - **find_one(\*\*criteria)** : Returns the first cart item that matches the given criteria, if no match is found return None.
 - **variants_group_by_product()** :  Return a dictionary with the products ids as keys and a list of variant as values.

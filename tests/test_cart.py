@@ -204,3 +204,10 @@ def test_prefixed_cart(cart: Cart, prefixed_cart: Cart):
     assert prefixed_cart.count == 2
     assert product_2 not in cart.products
     assert product not in prefixed_cart.products
+
+
+def test_cart_with_metadata(cart: Cart, product: Product):
+    metadata = {"comment": "for some reason this item is special"}
+    cart.update_metadata({"comment": "for some reason this item is special"})
+    cart.add(product, quantity=2, metadata=metadata)
+    assert metadata == cart.metadata

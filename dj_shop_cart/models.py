@@ -6,7 +6,7 @@ from django.utils import timezone
 
 
 class Cart(models.Model):
-    items = models.JSONField()
+    data = models.JSONField()
     customer = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     created = models.DateTimeField(default=timezone.now)
     modified = models.DateTimeField(auto_now_add=True)

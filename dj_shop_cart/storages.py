@@ -45,9 +45,9 @@ class DBStorage:
         if not self.request.user.is_authenticated:
             return data
         cart, _ = Cart.objects.get_or_create(
-            customer=self.request.user, defaults={"items": data}
+            customer=self.request.user, defaults={"data": data}
         )
-        return cart.items
+        return cart.data
 
     def save(self, data: dict) -> None:
         if not self.request.user.is_authenticated:
@@ -55,7 +55,7 @@ class DBStorage:
         else:
             Cart.objects.update_or_create(
                 customer=self.request.user,
-                defaults={"items": data},
+                defaults={"data": data},
             )
 
     def clear(self) -> None:
@@ -82,7 +82,7 @@ class CacheStorage:
         )
         return f"{self._cache_key}-{id_}"
 
-    def load(self) -> list[dict]:
+    def load(self) -> dict:
         return cache.get(self._cart_id, {})
 
     def save(self, data: dict) -> None:

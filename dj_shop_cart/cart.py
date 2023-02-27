@@ -69,7 +69,7 @@ class Cart:
     request: HttpRequest
     storage: Storage
     prefix: str = field(default=DEFAULT_CART_PREFIX)
-    metadata: dict = field(factory=dict)
+    _metadata: dict = field(factory=dict)
     _items: list[CartItem] = Factory(list)
 
     def __len__(self) -> int:
@@ -150,7 +150,6 @@ class Cart:
             it is that it needs to be json serializable
         :return: An instance of the item added
         """
-        quantity = int(quantity)
         assert (
             quantity >= 1
         ), f"Item quantity must be greater than or equal to 1: {quantity}"
@@ -172,7 +171,6 @@ class Cart:
         return item
 
     def increase(self, item_id: str, quantity: int = 1) -> CartItem | None:
-        quantity = int(quantity)
         assert (
             quantity >= 1
         ), f"Item quantity must be greater than or equal to 1: {quantity}"
@@ -226,15 +224,17 @@ class Cart:
         data[self.prefix] = {"items": items, "metadata": self.metadata}
         self.storage.save(data)
 
-    def empty(self, prefix: str = DEFAULT_CART_PREFIX) -> None:
+    def empty(self) -> None:
         self._items = []
+        self._metadata = {}
         data = self.storage.load()
         with contextlib.suppress(KeyError):
-            data.pop(prefix)
+            data.pop(self.prefix)
         self.storage.save(data)
 
     def empty_all(self) -> None:
         self._items = []
+        self._metadata = {}
         self.storage.clear()
 
     def variants_group_by_product(self) -> dict[str, list[CartItem]]:
@@ -260,8 +260,12 @@ class Cart:
     def after_remove(self, item: CartItem | None = None) -> None:
         pass
 
+    @property
+    def metadata(self) -> dict:
+        return self._metadata
+
     def update_metadata(self, metadata: dict) -> None:
-        self.metadata.update(metadata)
+        self._metadata.update(metadata)
         self.save()
 
     @classmethod
@@ -269,15 +273,17 @@ class Cart:
         """Appropriately create a new cart instance. This builder load existing cart if needed."""
         storage = get_module(conf.CART_STORAGE_BACKEND)(request)
         instance = cls(request=request, storage=storage, prefix=prefix)
-        try:
-            data = storage.load().get(prefix, {})
-            if isinstance(data, list):
-                # fixme this is a hack to support the old storage backend mechanism which was saving everything in a list
-                data = {"items": data, "metadata": {}}
-        except AttributeError:
-            # fixme this is a hack to support the old storage backend mechanism which was saving everything in a list
-            data = {"items": storage.load(), "metadata": {}}
-            storage.clear()
+        data = storage.load()
+        # the code below is to accommodate for old storage formats
+        if isinstance(data, list):
+            data = {prefix: {"items": data, "metadata": {}}}
+            storage.save(data)
+        if isinstance(data, dict):
+            data_ = data.get(prefix, {})
+            if isinstance(data_, list):
+                data = {prefix: {"items": data_, "metadata": {}}}
+                storage.save(data)
+
         metadata = data.get("metadata", {})
         items = data.get("items", [])
         for val in items:
@@ -288,7 +294,7 @@ class Cart:
                 # If the product associated with the item is no longer in the database, we skip it
                 continue
             instance._items.append(item)
-        instance.metadata.update(metadata)
+        instance._metadata = metadata
         return instance
 
 

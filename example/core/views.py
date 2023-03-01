@@ -45,15 +45,14 @@ def decrement_product(request):
 
 
 @require_POST
-def remove_product(request):
+def remove_product(request, item_id:str):
     cart = Cart.new(request)
-    product = get_object_or_404(Product.objects.all(), id=request.POST["product"])
-    cart.remove(product, variant=get_variant(request))
+    cart.remove(item_id)
     return redirect("index")
 
 
 @require_POST
 def empty_cart(request):
-    cart = Cart.ney(request)
+    cart = Cart.new(request)
     cart.empty()
     return redirect("index")

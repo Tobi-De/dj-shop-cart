@@ -111,6 +111,9 @@ def my_view(request):
     
     # calling len on the cart returns the number of unique items in the cart, regardless of the quantity.
     print(len(cart))
+    
+    # attach some metadata to the cart
+    cart.update_metadata({"discount": "10%"})
 
 ```
 

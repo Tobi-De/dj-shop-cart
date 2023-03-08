@@ -273,16 +273,10 @@ class Cart:
         """Appropriately create a new cart instance. This builder load existing cart if needed."""
         storage = get_module(conf.CART_STORAGE_BACKEND)(request)
         instance = cls(request=request, storage=storage, prefix=prefix)
-        data = storage.load()
-        # the code below is to accommodate for old storage formats
-        if isinstance(data, list):
-            data = {prefix: {"items": data, "metadata": {}}}
-            storage.save(data)
-        if isinstance(data, dict):
-            data_ = data.get(prefix, {})
-            if isinstance(data_, list):
-                data = {prefix: {"items": data_, "metadata": {}}}
-                storage.save(data)
+        try:
+            data = storage.load().get(prefix, {})
+        except (AttributeError, KeyError):
+            data = {}
 
         metadata = data.get("metadata", {})
         items = data.get("items", [])

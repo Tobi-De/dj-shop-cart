@@ -109,6 +109,10 @@ class Cart:
         The list of associated products.
         """
         return [item.product for item in self]
+    
+    @property
+    def items(self) -> list[CartItem]:
+        return self._items
 
     def find(self, **criteria) -> list[CartItem]:
         """

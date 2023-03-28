@@ -15,12 +15,13 @@ from tests.factories import ProductFactory
 User = get_user_model()
 Cart = get_cart_class()
 
+PREFIXED_CART_KEY = "dj_shop_cart_a"
+
 
 @pytest.fixture()
 def session(settings) -> SessionBase:
     engine = import_module(settings.SESSION_ENGINE)
-    SessionStore: type[SessionBase] = engine.SessionStore  # noqa
-    return SessionStore()
+    return engine.SessionStore()
 
 
 @pytest.fixture()
@@ -38,7 +39,7 @@ def prefixed_cart(rf: RequestFactory, session: SessionBase, settings) -> Cart:
     request = rf.get("/")
     request.user = AnonymousUser()
     request.session = session
-    return Cart.new(request, prefix="a")
+    return Cart.new(request, prefix=PREFIXED_CART_KEY)
 
 
 @pytest.fixture()

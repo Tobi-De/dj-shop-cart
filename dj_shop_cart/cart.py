@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import contextlib
 import itertools
-from decimal import Decimal
 from typing import Iterator, Type, TypeVar, Union, cast
 from uuid import uuid4
 
@@ -12,7 +11,7 @@ from django.db import models
 from django.http import HttpRequest
 
 from .conf import conf
-from .protocols import Storage
+from .protocols import Storage, Numeric
 from .utils import get_module
 
 __all__ = ("Cart", "CartItem", "get_cart_class")
@@ -37,11 +36,11 @@ class CartItem:
         return model.objects.get(pk=self.product_pk)
 
     @property
-    def subtotal(self) -> Decimal:
+    def subtotal(self) -> Numeric:
         return self.price * self.quantity
 
     @property
-    def price(self) -> Decimal:
+    def price(self) -> Numeric:
         return getattr(self.product, conf.CART_PRODUCT_GET_PRICE_METHOD)(self)
 
     @classmethod
@@ -82,8 +81,8 @@ class Cart:
         return item in self
 
     @property
-    def total(self) -> Decimal:
-        return Decimal(sum(item.subtotal for item in self))
+    def total(self) -> Numeric:
+        return sum(item.subtotal for item in self)
 
     @property
     def is_empty(self) -> bool:
@@ -247,18 +246,22 @@ class Cart:
         }
 
     def before_add(self, item: CartItem, quantity: int) -> None:
-        pass
+        """This is meant to be overridden by subclasses to add some logic that is run
+        before an item is added to the cart."""
 
     def after_add(self, item: CartItem) -> None:
-        pass
+        """This is meant to be overridden by subclasses to add some logic that is run
+        after an item is added to the cart."""
 
     def before_remove(
         self, item: CartItem | None = None, quantity: int | None = None
     ) -> None:
-        pass
+        """This is meant to be overridden by subclasses to add some logic that is run
+        before an item is removed from the cart."""
 
     def after_remove(self, item: CartItem | None = None) -> None:
-        pass
+        """This is meant to be overridden by subclasses to add some logic that is run after
+        an item is removed from the cart."""
 
     @property
     def metadata(self) -> dict:
@@ -273,16 +276,10 @@ class Cart:
         """Appropriately create a new cart instance. This builder load existing cart if needed."""
         storage = get_module(conf.CART_STORAGE_BACKEND)(request)
         instance = cls(request=request, storage=storage, prefix=prefix)
-        data = storage.load()
-        # the code below is to accommodate for old storage formats
-        if isinstance(data, list):
-            data = {prefix: {"items": data, "metadata": {}}}
-            storage.save(data)
-        if isinstance(data, dict):
-            data_ = data.get(prefix, {})
-            if isinstance(data_, list):
-                data = {prefix: {"items": data_, "metadata": {}}}
-                storage.save(data)
+        try:
+            data = storage.load().get(prefix, {})
+        except AttributeError:
+            data = {}
 
         metadata = data.get("metadata", {})
         items = data.get("items", [])

@@ -10,6 +10,9 @@ from dj_shop_cart.cart import get_cart_class
 from dj_shop_cart.storages import DBStorage, SessionStorage
 from tests.factories import ProductFactory
 from tests.models import Product
+from django.contrib.sessions.backends.base import SessionBase
+from django.test import RequestFactory
+from .conftest import PREFIXED_CART_KEY
 
 pytestmark = pytest.mark.django_db
 
@@ -207,7 +210,39 @@ def test_prefixed_cart(cart: Cart, prefixed_cart: Cart):
 
 
 def test_cart_with_metadata(cart: Cart, product: Product):
-    metadata = {"comment": "for some reason this item is special"}
-    cart.update_metadata({"comment": "for some reason this item is special"})
+    metadata = {"comment": "for some reason this cart is special"}
+    cart.update_metadata(metadata)
     cart.add(product, quantity=2, metadata=metadata)
     assert metadata == cart.metadata
+
+
+def test_prefixed_cart_with_metadata(
+    rf: RequestFactory, session: SessionBase, settings
+):
+    settings.CART_STORAGE_BACKEND = "dj_shop_cart.storages.SessionStorage"
+
+    metadata = {"simple_cart": "metadata for simple cart"}
+    metadata_2 = {"prefixed_cart": "metadata for prefixed cart"}
+
+    user = AnonymousUser()
+
+    first_request = rf.get("/")
+    first_request.user = user
+    first_request.session = session
+
+    cart = Cart.new(first_request)
+    cart.update_metadata(metadata)
+
+    prefixed_cart = Cart.new(first_request, prefix=PREFIXED_CART_KEY)
+    prefixed_cart.update_metadata(metadata_2)
+
+    # reload both carts
+    second_request = rf.get("/")
+    second_request.user = user
+    second_request.session = session
+
+    new_cart = Cart.new(second_request)
+    new_prefixed_cart = Cart.new(second_request, prefix=PREFIXED_CART_KEY)
+
+    assert new_cart.metadata == metadata
+    assert new_prefixed_cart.metadata == metadata_2

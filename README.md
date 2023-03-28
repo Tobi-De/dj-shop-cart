@@ -52,12 +52,12 @@ TEMPLATES = [
 
 from django.db import models
 from dj_shop_cart.cart import CartItem
-from decimal import Decimal
+from dj_shop_cart.protocols import Numeric
 
 class Product(models.Model):
     ...
 
-    def get_price(self, item:CartItem)->Decimal:
+    def get_price(self, item:CartItem) -> Numeric:
         """The only requirements of the dj_shop_cart package apart from the fact that the products you add
         to the cart must be instances of django based models. You can use a different name for this method
         but be sure to update the corresponding setting (see Configuration). Even if you change the name the

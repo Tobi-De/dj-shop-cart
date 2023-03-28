@@ -27,19 +27,19 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.8"
 Django = ">=3.0"
-attrs = ">=21.4,<23.0"
+attrs = "^22.2.0"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.2.1"
+pytest = "^7.2.2"
 pytest-django = "^4.5.2"
-mypy = "^1.0"
-pre-commit = "^3.1.0"
+mypy = "^1.1.1"
+pre-commit = "^3.2.1"
 black = "^23.1.0"
 isort = "^5.12.0"
-django-stubs = "^1.15.0"
+django-stubs = "^1.16.0"
 factory-boy = "^3.2.1"
-ipython = "^8.10.0"
-redis = "^4.5.1"
+ipython = "^8.11.0"
+redis = "^4.5.3"
 hiredis = "^2.2.2"
 pytest-pretty = "^1.1.1"
 

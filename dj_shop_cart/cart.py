@@ -271,6 +271,14 @@ class Cart:
         self._metadata.update(metadata)
         self.save()
 
+    def clear_metadata(self, *keys: list[str]) -> None:
+        if keys:
+            for key in keys:
+                self._metadata.pop(key, None)
+        else:
+            self._metadata = {}
+        self.save()
+
     @classmethod
     def new(cls, request: HttpRequest, prefix: str = DEFAULT_CART_PREFIX) -> Cart:
         """Appropriately create a new cart instance. This builder load existing cart if needed."""

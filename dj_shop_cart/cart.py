@@ -234,12 +234,6 @@ class Cart:
             self._metadata.clear()
         self.storage.save(data)
 
-    def empty_all(self) -> None:
-        """Empty all carts, prefixed or not."""
-        self._items = []
-        self._metadata = {}
-        self.storage.clear()
-
     def variants_group_by_product(self) -> dict[str, list[CartItem]]:
         """
         Return a dictionary with the products ids as keys and a list of variant as values.
@@ -305,6 +299,12 @@ class Cart:
             instance._items.append(item)
         instance._metadata = metadata
         return instance
+
+    @classmethod
+    def empty_all(cls, request: HttpRequest) -> None:
+        """Empty all carts, prefixed or not."""
+        storage = get_module(conf.CART_STORAGE_BACKEND)(request)
+        storage.clear()
 
 
 def get_cart_class() -> type[Cart]:

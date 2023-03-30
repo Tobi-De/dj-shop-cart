@@ -90,7 +90,7 @@ cart.empty()
 ```
 This method take no arguments.
 
-### Additional Properties of the cart object
+### Attributes of a `Cart` instance
 
 ```python
 def my_view(request):
@@ -123,11 +123,17 @@ def my_view(request):
 - **unique_count** : The number of unique items in the cart, regardless of the quantity.
 - **products** : A list of associated products.
 - **metadata** : A dictionary containing the metadata of the cart.
+- **empty(clear_metadata=True)** : Empty the cart. Takes an optional argument `clear_metadata` that defaults to `True`, if set to `False` the metadata of the cart will not be cleared.
 - **update_metadata(metadata:dict)** : Update the metadata of the cart.
 - **clear_metadata(\*keys:list[str])** : Clear the metadata of the cart. Takes an optional list of keys to clear, if no keys are specified, all metadata is cleared.
 - **find(\*\*criteria)** : Returns a list of cart items matching the given criteria.
 - **find_one(\*\*criteria)** : Returns the first cart item that matches the given criteria, if no match is found return None.
 - **variants_group_by_product()** :  Return a dictionary with the products ids as keys and a list of variant as values.
+
+### Classmethods of `Cart` 
+
+- **new(request:HttpRequest, prefix="default")** : Create a new cart instance and load existing data from the storage backend.
+- **empty_all(request:HttpRequest)** : Empty all carts for the current user.
 
 ## Multiple Carts
 

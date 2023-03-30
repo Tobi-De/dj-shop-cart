@@ -223,15 +223,19 @@ class Cart:
         data[self.prefix] = {"items": items, "metadata": self.metadata}
         self.storage.save(data)
 
-    def empty(self) -> None:
+    def empty(self, clear_metadata: bool = True) -> None:
+        """Delete all items in the cart, and optionally clear the metadata."""
         self._items = []
         self._metadata = {}
         data = self.storage.load()
         with contextlib.suppress(KeyError):
             data.pop(self.prefix)
+        if clear_metadata:
+            self._metadata.clear()
         self.storage.save(data)
 
     def empty_all(self) -> None:
+        """Empty all carts, prefixed or not."""
         self._items = []
         self._metadata = {}
         self.storage.clear()

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dj-shop-cart"
-version = "7.0.0"
+version = "7.0.1"
 description = "Simple django cart manager for your django projects."
 authors = ["Tobi DEGNON <tobidegnon@protonmail.com>"]
 license = "MIT"
@@ -25,7 +25,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.7"
 Django = ">=3.0"
 attrs = "^22.2.0"
 

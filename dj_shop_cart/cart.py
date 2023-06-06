@@ -47,8 +47,6 @@ class CartItem:
     def from_product(
         cls,
         product: ProductModel,
-        /,
-        *,
         quantity: int,
         variant: Variant | None = None,
         metadata: dict | None = None,

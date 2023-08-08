@@ -107,6 +107,7 @@ def empty_cart(request: HttpRequest):
 This project is used by the following companies:
 
 - [Fêmy bien être](https://www.femybienetre.com/)
+- [Bjørn Art](https://bjornart.dk/)
 
 ## Development
 

@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+from decimal import Decimal
+from django.http import HttpRequest
+
 try:
-    from typing import Protocol
+    from typing import Protocol, Union
 except ImportError:
     from typing_extensions import Protocol
 
 
-from django.http import HttpRequest
+Numeric = Union[float, int, Decimal]
 
 
 class Storage(Protocol):
@@ -19,45 +22,4 @@ class Storage(Protocol):
         ...
 
     def clear(self) -> None:
-        ...
-
-
-class Numeric(Protocol):
-    def __add__(self, *args, **kwargs) -> Numeric:
-        ...
-
-    def __sub__(self, *args, **kwargs) -> Numeric:
-        ...
-
-    def __mul__(self, *args, **kwargs) -> Numeric:
-        ...
-
-    def __truediv__(self, *args, **kwargs) -> Numeric:
-        ...
-
-    def __floordiv__(self, *args, **kwargs) -> Numeric:
-        ...
-
-    def __mod__(self, *args, **kwargs) -> Numeric:
-        ...
-
-    def __pow__(self, *args, **kwargs) -> Numeric:
-        ...
-
-    def __lt__(self, *args, **kwargs) -> bool:
-        ...
-
-    def __le__(self, *args, **kwargs) -> bool:
-        ...
-
-    def __eq__(self, *args, **kwargs) -> bool:
-        ...
-
-    def __ne__(self, *args, **kwargs) -> bool:
-        ...
-
-    def __gt__(self, *args, **kwargs) -> bool:
-        ...
-
-    def __ge__(self, *args, **kwargs) -> bool:
         ...

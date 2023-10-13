@@ -5,9 +5,9 @@ from django.contrib.auth import get_user_model
 from django.contrib.sessions.backends.base import SessionBase
 from django.core.cache import cache
 
+from dj_shop_cart.cart import DEFAULT_CART_PREFIX
 from dj_shop_cart.conf import conf
 from dj_shop_cart.models import Cart
-from dj_shop_cart.cart import DEFAULT_CART_PREFIX
 from dj_shop_cart.storages import CacheStorage, DBStorage, SessionStorage
 
 pytestmark = pytest.mark.django_db

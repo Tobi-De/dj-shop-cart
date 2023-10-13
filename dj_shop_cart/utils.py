@@ -1,8 +1,14 @@
 from __future__ import annotations
 
-from importlib import import_module
+import inspect
+from typing import Any
+
+from django.core.exceptions import ImproperlyConfigured
+from django.utils.module_loading import import_string
 
 
-def get_module(path: str) -> type:
-    package, module = path.rsplit(".", 1)
-    return getattr(import_module(package), module)
+def import_class(self, path: str) -> Any:
+    value = import_string(path)
+    if not inspect.isclass(value):
+        raise ImproperlyConfigured(f"Specified `{value}` is not a class.")
+    return value

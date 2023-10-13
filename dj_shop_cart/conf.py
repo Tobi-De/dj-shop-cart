@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from django.conf import settings
 
+from .utils import import_class
+
 
 class Settings:
     """
@@ -18,21 +20,33 @@ class Settings:
         return getattr(settings, "CART_CACHE_TIMEOUT", 60 * 60 * 24 * 5)
 
     @property
-    def CART_CLASS(self) -> str:
-        return getattr(settings, "CART_CLASS", "dj_shop_cart.cart.Cart")
+    def CART_MODIFIERS(self) -> list[str]:
+        from .modifiers import CartModifier
+
+        cart_modifiers = getattr(settings, "CART_MODIFIERS", [])
+        modifiers_classes = []
+
+        for value in cart_modifiers:
+            modifier: type[CartModifier] = import_class(value)
+
+            if not issubclass(modifier, CartModifier):
+                self._error(f"Modifer `{modifier}` must subclass `{CartModifier}`.")
+
+            modifiers_classes.append(modifier)
+        return modifiers_classes
 
     @property
     def CART_PRODUCT_GET_PRICE_METHOD(self) -> str:
         return getattr(settings, "CART_PRODUCT_GET_PRICE_METHOD", "get_price")
 
     @property
-    def CART_STORAGE_BACKEND(self) -> str:
+    def CART_STORAGE_BACKEND(self) -> object:
         backend = getattr(settings, "CART_STORAGE_BACKEND", None)
         if backend == "dj_shop_cart.storages.DBStorage":
             assert (
                 "dj_shop_cart" in settings.INSTALLED_APPS
             ), "You need to add dj_shop_cart to INSTALLED_APPS to use the DBStorage"
-        return backend or "dj_shop_cart.storages.SessionStorage"
+        return import_class(backend or "dj_shop_cart.storages.SessionStorage")
 
     @property
     def app_is_installed(self) -> bool:

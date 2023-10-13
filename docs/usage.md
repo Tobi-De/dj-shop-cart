@@ -98,20 +98,20 @@ def my_view(request):
     # by looping through the cart, we return all the CartItem objects.
     for item in cart:
         print(item.subtotal)
-    
+
     # find items based on product_pk, cart item id, variant details, quantity, etc.
     item = cart.find_one(product_pk=1)[0]
     assert item in cart
-    
+
     # the number of items in the cart
     print(cart.count)
-    
+
     # the number of unique items
     print(cart.unique_count)
-    
+
     # calling len on the cart returns the number of unique items in the cart, regardless of the quantity.
     print(len(cart))
-    
+
     # attach some metadata to the cart
     cart.update_metadata({"discount": "10%"})
 
@@ -130,7 +130,7 @@ def my_view(request):
 - **find_one(\*\*criteria)** : Returns the first cart item that matches the given criteria, if no match is found return None.
 - **variants_group_by_product()** :  Return a dictionary with the products ids as keys and a list of variant as values.
 
-### Classmethods of `Cart` 
+### Classmethods of `Cart`
 
 - **new(request:HttpRequest, prefix="default")** : Create a new cart instance and load existing data from the storage backend.
 - **empty_all(request:HttpRequest)** : Empty all carts for the current user.
@@ -151,7 +151,7 @@ assert product_b in cart_b
 assert product_a not in cart_b
 assert product_b not in cart_a
 ```
-A little tip if you don't want to have to remember to pass the right prefix each time you instantiate a new cart, 
+A little tip if you don't want to have to remember to pass the right prefix each time you instantiate a new cart,
 use the `partial` method from the `functools` module.
 
 ```python

@@ -45,7 +45,7 @@ def decrement_product(request):
 
 
 @require_POST
-def remove_product(request, item_id:str):
+def remove_product(request, item_id: str):
     cart = Cart.new(request)
     cart.remove(item_id)
     return redirect("index")

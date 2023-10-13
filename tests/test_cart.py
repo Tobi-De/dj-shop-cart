@@ -5,13 +5,14 @@ import uuid
 import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
+from django.contrib.sessions.backends.base import SessionBase
+from django.test import RequestFactory
 
 from dj_shop_cart.cart import get_cart_class
 from dj_shop_cart.storages import DBStorage, SessionStorage
 from tests.factories import ProductFactory
 from tests.models import Product
-from django.contrib.sessions.backends.base import SessionBase
-from django.test import RequestFactory
+
 from .conftest import PREFIXED_CART_KEY
 
 pytestmark = pytest.mark.django_db

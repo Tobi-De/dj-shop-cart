@@ -129,8 +129,3 @@ pytest
 
 If you have any feedback, please reach out to me at tobidegnon@proton.me.
 
-## Credits
-
-Thanks to [Jetbrains](https://jb.gg/OpenSource) for providing an Open Source license for this project.
-
-<img height="200" src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo (Main) logo.">

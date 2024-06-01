@@ -63,7 +63,6 @@ class CartItem:
 
 @define(kw_only=True)
 class Cart:
-    request: HttpRequest
     storage: Storage
     prefix: str = field(default=DEFAULT_CART_PREFIX)
     _metadata: dict = field(factory=dict)
@@ -279,7 +278,7 @@ class Cart:
     def new(cls, request: HttpRequest, prefix: str = DEFAULT_CART_PREFIX) -> Cart:
         """Appropriately create a new cart instance. This builder load existing cart if needed."""
         storage = get_module(conf.CART_STORAGE_BACKEND)(request)
-        instance = cls(request=request, storage=storage, prefix=prefix)
+        instance = cls(storage=storage, prefix=prefix)
         try:
             data = storage.load().get(prefix, {})
         except AttributeError:

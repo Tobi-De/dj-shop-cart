@@ -173,16 +173,6 @@ class Cart:
         self.save()
         return item
 
-    def increase(self, item_id: str, quantity: int = 1) -> CartItem | None:
-        assert (
-            quantity >= 1
-        ), f"Item quantity must be greater than or equal to 1: {quantity}"
-        item = self.find_one(id=item_id)
-        if not item:
-            return None
-        self.add(product=item.product, quantity=quantity)
-        return item
-
     def remove(
         self,
         item_id: str,

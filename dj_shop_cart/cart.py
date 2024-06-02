@@ -3,7 +3,7 @@ from __future__ import annotations
 import contextlib
 import itertools
 from collections.abc import Iterator
-from typing import TypeVar, Union, cast
+from typing import TypeVar, cast
 from uuid import uuid4
 
 from attrs import Factory, asdict, define, field
@@ -19,7 +19,6 @@ from .utils import import_class
 __all__ = ("Cart", "CartItem", "get_cart_class")
 
 DjangoModel = TypeVar("DjangoModel", bound=models.Model)
-Variant = Union[str, int, dict, set]
 DEFAULT_CART_PREFIX = "default"
 
 
@@ -27,7 +26,7 @@ DEFAULT_CART_PREFIX = "default"
 class CartItem:
     id: str = field(factory=uuid4, converter=str)
     quantity: int = field(eq=False, converter=int)
-    variant: Variant | None = field(default=None)
+    variant: str | None = field(default=None)
     product_pk: str = field(converter=str)
     product_model_path: str
     metadata: dict = field(factory=dict, eq=False)
@@ -50,7 +49,7 @@ class CartItem:
         cls,
         product: DjangoModel,
         quantity: int,
-        variant: Variant | None = None,
+        variant: str | None = None,
         metadata: dict | None = None,
     ) -> CartItem:
         metadata = metadata or {}
@@ -132,7 +131,7 @@ class Cart:
         product: DjangoModel,
         *,
         quantity: int = 1,
-        variant: Variant | None = None,
+        variant: str | None = None,
         override_quantity: bool = False,
         metadata: dict | None = None,
     ) -> CartItem:

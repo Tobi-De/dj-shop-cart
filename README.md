@@ -67,14 +67,12 @@ class Product(models.Model):
 
 # views.py
 
-from dj_shop_cart.cart import get_cart_class
+from dj_shop_cart.cart import Cart
 from django.http import HttpRequest
 from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404
 
 from .models import Product
-
-Cart = get_cart_class()
 
 
 @require_POST
@@ -128,4 +126,3 @@ pytest
 ## Feedback
 
 If you have any feedback, please reach out to me at tobidegnon@proton.me.
-

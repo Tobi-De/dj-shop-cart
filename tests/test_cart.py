@@ -9,7 +9,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.contrib.sessions.backends.base import SessionBase
 from django.test import RequestFactory
 
-from dj_shop_cart.cart import get_cart, get_cart_class
+from dj_shop_cart.cart import CartItem, get_cart, get_cart_class
 from dj_shop_cart.modifiers import CartModifier, cart_modifiers_pool
 from dj_shop_cart.storages import DBStorage, SessionStorage
 from tests.factories import ProductFactory
@@ -264,8 +264,8 @@ class P:
     name: str
 
     @classmethod
-    def get_object(cls, pk: str):
-        return db[pk]
+    def get_cart_object(cls, item: CartItem):
+        return db[item.product_pk]
 
 
 def test_add_not_django_model(rf, session, cart):

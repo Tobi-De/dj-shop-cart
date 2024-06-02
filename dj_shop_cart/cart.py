@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import itertools
 from collections.abc import Iterator
+from functools import cached_property
 from typing import TypeVar, cast
 from uuid import uuid4
 
@@ -31,14 +32,14 @@ class CartItem:
     product_model_path: str
     metadata: dict = field(factory=dict, eq=False)
 
-    @property
+    @cached_property
     def product(self) -> DjangoModel:
         model = cast(type[DjangoModel], import_class(self.product_model_path))
-        try:
-            return model.objects.get(pk=self.product_pk)
-        except AttributeError:
-            # this is a hack to allow to use a product that is not a django model
-            return model.get_object(pk=self.product_pk)
+        if func := getattr(model, "get_cart_object", None):
+            # this is a hack to allow to use a product that is not a django
+            # model instance / instance not already save in db
+            return func(self)  # noqa
+        return model.objects.get(pk=self.product_pk)
 
     @property
     def subtotal(self) -> Numeric:

@@ -83,6 +83,10 @@ class Cart:
         return item in self
 
     @property
+    def items(self) -> list[CartItem]:
+        return self._items
+
+    @property
     def total(self) -> Numeric:
         return sum(item.subtotal for item in self)
 

@@ -1,8 +1,14 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 
 from .utils import import_class
+
+if TYPE_CHECKING:
+    from .modifiers import CartModifier
 
 
 class Settings:
@@ -20,7 +26,7 @@ class Settings:
         return getattr(settings, "CART_CACHE_TIMEOUT", 60 * 60 * 24 * 5)
 
     @property
-    def CART_MODIFIERS(self) -> list[str]:
+    def CART_MODIFIERS(self) -> list[type[CartModifier]]:
         from .modifiers import CartModifier
 
         cart_modifiers = getattr(settings, "CART_MODIFIERS", [])
@@ -30,7 +36,9 @@ class Settings:
             modifier: type[CartModifier] = import_class(value)
 
             if not issubclass(modifier, CartModifier):
-                self._error(f"Modifer `{modifier}` must subclass `{CartModifier}`.")
+                raise ImproperlyConfigured(
+                    f"Modifier `{modifier}` must subclass `{CartModifier}`."
+                )
 
             modifiers_classes.append(modifier)
         return modifiers_classes

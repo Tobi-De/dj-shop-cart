@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import contextlib
 import itertools
-from typing import Iterator, Type, TypeVar, Union, cast
+from collections.abc import Iterator
+from typing import TypeVar, Union, cast
 from uuid import uuid4
 
 from attrs import Factory, asdict, define, field
@@ -17,7 +18,7 @@ from .utils import import_class
 
 __all__ = ("Cart", "CartItem", "get_cart_class")
 
-ProductModel = TypeVar("ProductModel", bound=models.Model)
+DjangoModel = TypeVar("DjangoModel", bound=models.Model)
 Variant = Union[str, int, dict, set]
 DEFAULT_CART_PREFIX = "default"
 
@@ -32,8 +33,8 @@ class CartItem:
     metadata: dict = field(factory=dict, eq=False)
 
     @property
-    def product(self) -> ProductModel:
-        model = cast(Type[ProductModel], import_class(self.product_model_path))
+    def product(self) -> DjangoModel:
+        model = cast(type[DjangoModel], import_class(self.product_model_path))
         return model.objects.get(pk=self.product_pk)
 
     @property
@@ -47,7 +48,7 @@ class CartItem:
     @classmethod
     def from_product(
         cls,
-        product: ProductModel,
+        product: DjangoModel,
         quantity: int,
         variant: Variant | None = None,
         metadata: dict | None = None,
@@ -101,7 +102,7 @@ class Cart:
         return len(self._items)
 
     @property
-    def products(self) -> list[ProductModel]:
+    def products(self) -> list[DjangoModel]:
         """
         The list of associated products.
         """
@@ -128,7 +129,7 @@ class Cart:
 
     def add(
         self,
-        product: ProductModel,
+        product: DjangoModel,
         *,
         quantity: int = 1,
         variant: Variant | None = None,
@@ -174,7 +175,14 @@ class Cart:
         return item
 
     def increase(self, item_id: str, quantity: int = 1) -> CartItem | None:
-        return self.add(item_id, quantity=quantity)
+        assert (
+            quantity >= 1
+        ), f"Item quantity must be greater than or equal to 1: {quantity}"
+        item = self.find_one(id=item_id)
+        if not item:
+            return None
+        self.add(product=item.product, quantity=quantity)
+        return item
 
     def remove(
         self,

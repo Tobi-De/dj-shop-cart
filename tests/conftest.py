@@ -52,25 +52,6 @@ def cart_db(rf: RequestFactory, user: User, session: SessionBase, settings):
 
 
 @pytest.fixture()
-def custom_cart_manager():
-    class CustomCart(Cart):
-        def before_add(self, item, quantity):
-            item.metadata["hooks"] = ["before_add"]
-
-        def after_add(self, item):
-            item.metadata["hooks"] = item.metadata["hooks"] + ["after_add"]
-
-        def before_remove(self, item=None, quantity=None):
-            if item:
-                item.metadata["hooks"] = item.metadata["hooks"] + ["before_remove"]
-
-        def after_remove(self, item=None):
-            item.metadata["hooks"] = item.metadata["hooks"] + ["after_remove"]
-
-    return CustomCart
-
-
-@pytest.fixture()
 def product():
     return ProductFactory()
 

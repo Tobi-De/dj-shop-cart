@@ -7,7 +7,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.utils.module_loading import import_string
 
 
-def import_class(self, path: str) -> Any:
+def import_class(path: str) -> Any:
     value = import_string(path)
     if not inspect.isclass(value):
         raise ImproperlyConfigured(f"Specified `{value}` is not a class.")

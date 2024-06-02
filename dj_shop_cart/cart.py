@@ -16,7 +16,7 @@ from .modifiers import cart_modifiers_pool
 from .protocols import Numeric, Storage
 from .utils import import_class
 
-__all__ = ("Cart", "CartItem", "get_cart_class")
+__all__ = ("Cart", "CartItem", "get_cart_class", "get_cart")
 
 DjangoModel = TypeVar("DjangoModel", bound=models.Model)
 DEFAULT_CART_PREFIX = "default"
@@ -230,17 +230,6 @@ class Cart:
         data[self.prefix] = {"items": items, "metadata": self.metadata}
         self.storage.save(data)
 
-    def empty(self, clear_metadata: bool = True) -> None:
-        """Delete all items in the cart, and optionally clear the metadata."""
-        self._items = []
-        self._metadata = {}
-        data = self.storage.load()
-        with contextlib.suppress(KeyError):
-            data.pop(self.prefix)
-        if clear_metadata:
-            self._metadata.clear()
-        self.storage.save(data)
-
     def variants_group_by_product(self) -> dict[str, list[CartItem]]:
         """
         Return a dictionary with the products ids as keys and a list of variant as values.
@@ -266,10 +255,24 @@ class Cart:
             self._metadata = {}
         self.save()
 
+    def empty(self, clear_metadata: bool = True) -> None:
+        """Delete all items in the cart, and optionally clear the metadata."""
+        self._items = []
+        self._metadata = {}
+        data = self.storage.load()
+        with contextlib.suppress(KeyError):
+            data.pop(self.prefix)
+        if clear_metadata:
+            self._metadata.clear()
+        self.storage.save(data)
+
+    def empty_all(self) -> None:
+        """Empty all carts for the current user"""
+        self.storage.clear()
+
     @classmethod
-    def new(cls, request: HttpRequest, prefix: str = DEFAULT_CART_PREFIX) -> Cart:
+    def new(cls, storage: Storage, prefix: str = DEFAULT_CART_PREFIX) -> Cart:
         """Appropriately create a new cart instance. This builder load existing cart if needed."""
-        storage = conf.CART_STORAGE_BACKEND(request)
         instance = cls(storage=storage, prefix=prefix)
         try:
             data = storage.load().get(prefix, {})
@@ -289,11 +292,10 @@ class Cart:
         instance._metadata = metadata
         return instance
 
-    @classmethod
-    def empty_all(cls, request: HttpRequest) -> None:
-        """Empty all carts, prefixed or not."""
-        storage = conf.CART_STORAGE_BACKEND(request)
-        storage.clear()
+
+def get_cart(request: HttpRequest, prefix: str = DEFAULT_CART_PREFIX) -> Cart:
+    storage = conf.CART_STORAGE_BACKEND(request)
+    return Cart.new(storage=storage, prefix=prefix)
 
 
 def get_cart_class() -> type[Cart]:

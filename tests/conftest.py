@@ -8,12 +8,11 @@ from django.contrib.auth.models import AnonymousUser
 from django.contrib.sessions.backends.base import SessionBase
 from django.test import RequestFactory
 
-from dj_shop_cart.cart import get_cart_class
+from dj_shop_cart.cart import Cart, get_cart
 from dj_shop_cart.storages import CacheStorage, DBStorage, SessionStorage
 from tests.factories import ProductFactory
 
 User = get_user_model()
-Cart = get_cart_class()
 
 PREFIXED_CART_KEY = "dj_shop_cart_a"
 
@@ -30,7 +29,7 @@ def cart(rf: RequestFactory, session: SessionBase, settings) -> Cart:
     request = rf.get("/")
     request.user = AnonymousUser()
     request.session = session
-    return Cart.new(request)
+    return get_cart(request)
 
 
 @pytest.fixture()
@@ -39,7 +38,7 @@ def prefixed_cart(rf: RequestFactory, session: SessionBase, settings) -> Cart:
     request = rf.get("/")
     request.user = AnonymousUser()
     request.session = session
-    return Cart.new(request, prefix=PREFIXED_CART_KEY)
+    return get_cart(request, prefix=PREFIXED_CART_KEY)
 
 
 @pytest.fixture()
@@ -48,7 +47,7 @@ def cart_db(rf: RequestFactory, user: User, session: SessionBase, settings):
     request = rf.get("/")
     request.user = user
     request.session = session
-    return Cart.new(request)
+    return get_cart(request)
 
 
 @pytest.fixture()

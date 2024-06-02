@@ -8,7 +8,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.contrib.sessions.backends.base import SessionBase
 from django.test import RequestFactory
 
-from dj_shop_cart.cart import get_cart_class
+from dj_shop_cart.cart import get_cart, get_cart_class
 from dj_shop_cart.modifiers import CartModifier, cart_modifiers_pool
 from dj_shop_cart.storages import DBStorage, SessionStorage
 from tests.factories import ProductFactory
@@ -219,10 +219,10 @@ def test_prefixed_cart_with_metadata(
     first_request.user = user
     first_request.session = session
 
-    cart = Cart.new(first_request)
+    cart = get_cart(first_request)
     cart.update_metadata(metadata)
 
-    prefixed_cart = Cart.new(first_request, prefix=PREFIXED_CART_KEY)
+    prefixed_cart = get_cart(first_request, prefix=PREFIXED_CART_KEY)
     prefixed_cart.update_metadata(metadata_2)
 
     # reload both carts
@@ -230,8 +230,8 @@ def test_prefixed_cart_with_metadata(
     second_request.user = user
     second_request.session = session
 
-    new_cart = Cart.new(second_request)
-    new_prefixed_cart = Cart.new(second_request, prefix=PREFIXED_CART_KEY)
+    new_cart = get_cart(second_request)
+    new_prefixed_cart = get_cart(second_request, prefix=PREFIXED_CART_KEY)
 
     assert new_cart.metadata == metadata
     assert new_prefixed_cart.metadata == metadata_2
@@ -258,7 +258,6 @@ def test_cart_custom_modifier(rf, session, cart, product, monkeypatch):
     request = rf.get("/")
     request.user = AnonymousUser()
     request.session = session
-    cart = cart.new(request)
     item = cart.add(product)
     assert "before_add" in item.metadata["hooks"]
     assert "after_add" in item.metadata["hooks"]

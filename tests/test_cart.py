@@ -5,13 +5,15 @@ import uuid
 import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
+from django.contrib.sessions.backends.base import SessionBase
+from django.test import RequestFactory
 
 from dj_shop_cart.cart import get_cart_class
+from dj_shop_cart.modifiers import CartModifier, cart_modifiers_pool
 from dj_shop_cart.storages import DBStorage, SessionStorage
 from tests.factories import ProductFactory
 from tests.models import Product
-from django.contrib.sessions.backends.base import SessionBase
-from django.test import RequestFactory
+
 from .conftest import PREFIXED_CART_KEY
 
 pytestmark = pytest.mark.django_db
@@ -185,19 +187,6 @@ def test_cart_item_with_metadata(cart: Cart, product: Product):
     assert metadata == cart.find_one(product=product).metadata
 
 
-def test_cart_custom_manager(rf, session, custom_cart_manager, product):
-    request = rf.get("/")
-    request.user = AnonymousUser()
-    request.session = session
-    cart = custom_cart_manager.new(request)
-    item = cart.add(product)
-    assert "before_add" in item.metadata["hooks"]
-    assert "after_add" in item.metadata["hooks"]
-    item = cart.remove(item.id)
-    assert "before_remove" in item.metadata["hooks"]
-    assert "after_remove" in item.metadata["hooks"]
-
-
 def test_prefixed_cart(cart: Cart, prefixed_cart: Cart):
     product = ProductFactory()
     product_2 = ProductFactory()
@@ -246,3 +235,33 @@ def test_prefixed_cart_with_metadata(
 
     assert new_cart.metadata == metadata
     assert new_prefixed_cart.metadata == metadata_2
+
+
+class TestModifier(CartModifier):
+    def before_add(self, cart, item, quantity):
+        print("is run")
+        item.metadata["hooks"] = ["before_add"]
+
+    def after_add(self, cart, item):
+        item.metadata["hooks"] = item.metadata["hooks"] + ["after_add"]
+
+    def before_remove(self, cart, item=None, quantity=None):
+        if item:
+            item.metadata["hooks"] = item.metadata["hooks"] + ["before_remove"]
+
+    def after_remove(self, cart, item=None):
+        item.metadata["hooks"] = item.metadata["hooks"] + ["after_remove"]
+
+
+def test_cart_custom_modifier(rf, session, cart, product, monkeypatch):
+    monkeypatch.setattr(cart_modifiers_pool, "get_modifiers", lambda: [TestModifier()])
+    request = rf.get("/")
+    request.user = AnonymousUser()
+    request.session = session
+    cart = cart.new(request)
+    item = cart.add(product)
+    assert "before_add" in item.metadata["hooks"]
+    assert "after_add" in item.metadata["hooks"]
+    item = cart.remove(item.id)
+    assert "before_remove" in item.metadata["hooks"]
+    assert "after_remove" in item.metadata["hooks"]

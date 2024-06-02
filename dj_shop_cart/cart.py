@@ -2,21 +2,23 @@ from __future__ import annotations
 
 import contextlib
 import itertools
-from typing import Iterator, Type, TypeVar, Union, cast
+from collections.abc import Iterator
+from typing import TypeVar, Union, cast
 from uuid import uuid4
 
 from attrs import Factory, asdict, define, field
-from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.http import HttpRequest
 
 from .conf import conf
-from .protocols import Storage, Numeric
-from .utils import get_module
+from .modifiers import cart_modifiers_pool
+from .protocols import Numeric, Storage
+from .utils import import_class
 
 __all__ = ("Cart", "CartItem", "get_cart_class")
 
-ProductModel = TypeVar("ProductModel", bound=models.Model)
+DjangoModel = TypeVar("DjangoModel", bound=models.Model)
 Variant = Union[str, int, dict, set]
 DEFAULT_CART_PREFIX = "default"
 
@@ -31,8 +33,8 @@ class CartItem:
     metadata: dict = field(factory=dict, eq=False)
 
     @property
-    def product(self) -> ProductModel:
-        model = cast(Type[ProductModel], get_module(self.product_model_path))
+    def product(self) -> DjangoModel:
+        model = cast(type[DjangoModel], import_class(self.product_model_path))
         return model.objects.get(pk=self.product_pk)
 
     @property
@@ -46,7 +48,7 @@ class CartItem:
     @classmethod
     def from_product(
         cls,
-        product: ProductModel,
+        product: DjangoModel,
         quantity: int,
         variant: Variant | None = None,
         metadata: dict | None = None,
@@ -100,7 +102,7 @@ class Cart:
         return len(self._items)
 
     @property
-    def products(self) -> list[ProductModel]:
+    def products(self) -> list[DjangoModel]:
         """
         The list of associated products.
         """
@@ -127,7 +129,7 @@ class Cart:
 
     def add(
         self,
-        product: ProductModel,
+        product: DjangoModel,
         *,
         quantity: int = 1,
         variant: Variant | None = None,
@@ -157,12 +159,18 @@ class Cart:
             self._items.append(item)
         if metadata:
             item.metadata.update(metadata)
-        self.before_add(item=item, quantity=quantity)
+
+        for modifier in cart_modifiers_pool.get_modifiers():
+            modifier.before_add(cart=self, item=item, quantity=quantity)
+
         if override_quantity:
             item.quantity = quantity
         else:
             item.quantity += quantity
-        self.after_add(item=item)
+
+        for modifier in cart_modifiers_pool.get_modifiers():
+            modifier.after_add(cart=self, item=item)
+
         self.save()
         return item
 
@@ -171,12 +179,9 @@ class Cart:
             quantity >= 1
         ), f"Item quantity must be greater than or equal to 1: {quantity}"
         item = self.find_one(id=item_id)
-        self.before_add(item=item, quantity=quantity)
         if not item:
             return None
-        item.quantity += quantity
-        self.after_add(item=item)
-        self.save()
+        self.add(product=item.product, quantity=quantity)
         return item
 
     def remove(
@@ -195,14 +200,20 @@ class Cart:
         item = self.find_one(id=item_id)
         if not item:
             return None
-        self.before_remove(item=item, quantity=quantity)
+
+        for modifier in cart_modifiers_pool.get_modifiers():
+            modifier.before_remove(cart=self, item=item, quantity=quantity)
+
         if quantity:
             item.quantity -= int(quantity)
         else:
             item.quantity = 0
         if item.quantity <= 0:
             self._items.pop(self._items.index(item))
-        self.after_remove(item=item)
+
+        for modifier in cart_modifiers_pool.get_modifiers():
+            modifier.after_remove(cart=self, item=item)
+
         self.save()
         return item
 
@@ -240,24 +251,6 @@ class Cart:
             for key, items in itertools.groupby(self, lambda item: item.product_pk)
         }
 
-    def before_add(self, item: CartItem, quantity: int) -> None:
-        """This is meant to be overridden by subclasses to add some logic that is run
-        before an item is added to the cart."""
-
-    def after_add(self, item: CartItem) -> None:
-        """This is meant to be overridden by subclasses to add some logic that is run
-        after an item is added to the cart."""
-
-    def before_remove(
-        self, item: CartItem | None = None, quantity: int | None = None
-    ) -> None:
-        """This is meant to be overridden by subclasses to add some logic that is run
-        before an item is removed from the cart."""
-
-    def after_remove(self, item: CartItem | None = None) -> None:
-        """This is meant to be overridden by subclasses to add some logic that is run after
-        an item is removed from the cart."""
-
     @property
     def metadata(self) -> dict:
         return self._metadata
@@ -277,7 +270,7 @@ class Cart:
     @classmethod
     def new(cls, request: HttpRequest, prefix: str = DEFAULT_CART_PREFIX) -> Cart:
         """Appropriately create a new cart instance. This builder load existing cart if needed."""
-        storage = get_module(conf.CART_STORAGE_BACKEND)(request)
+        storage = conf.CART_STORAGE_BACKEND(request)
         instance = cls(storage=storage, prefix=prefix)
         try:
             data = storage.load().get(prefix, {})
@@ -300,7 +293,7 @@ class Cart:
     @classmethod
     def empty_all(cls, request: HttpRequest) -> None:
         """Empty all carts, prefixed or not."""
-        storage = get_module(conf.CART_STORAGE_BACKEND)(request)
+        storage = conf.CART_STORAGE_BACKEND(request)
         storage.clear()
 
 
@@ -308,9 +301,4 @@ def get_cart_class() -> type[Cart]:
     """
     Returns the correct cart manager class
     """
-    klass = get_module(conf.CART_CLASS)
-    if not issubclass(klass, Cart):
-        raise ImproperlyConfigured(
-            "The `CART_CLASS` settings must be a subclass of the `Cart` class."
-        )
-    return klass
+    return Cart

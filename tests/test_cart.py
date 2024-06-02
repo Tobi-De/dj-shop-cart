@@ -88,6 +88,18 @@ def test_cart_add_override_quantity_db_storage(cart_db: Cart):
     add_product_override_quantity(cart=cart_db)
 
 
+def test_cart_increase_quantity(cart: Cart):
+    product = ProductFactory()
+    item = cart.add(product, quantity=10)
+    item = cart.increase(item.id, quantity=10)
+    assert item.quantity == 20
+
+
+def test_cart_increase_quantity_fake_item(cart: Cart):
+    item = cart.increase(str(uuid.uuid4()), quantity=10)
+    assert item is None
+
+
 def cart_is_empty(cart: Cart):
     assert cart.is_empty
     product = ProductFactory()

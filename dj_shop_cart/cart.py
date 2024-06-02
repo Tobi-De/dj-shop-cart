@@ -182,6 +182,34 @@ class Cart:
         self.save()
         return item
 
+    def increase(
+        self,
+        item_id: str,
+        *,
+        quantity: int = 1,
+    ) -> CartItem | None:
+        """
+        Increase the quantity of an item already in the cart
+
+        :param item_id: The cart item id
+        :param quantity: The quantity to add
+        :return: The updated item  or None
+        """
+        item = self.find_one(id=item_id)
+        if not item:
+            return
+
+        for modifier in cart_modifiers_pool.get_modifiers():
+            modifier.before_add(cart=self, item=item, quantity=quantity)
+
+        item.quantity += quantity
+
+        for modifier in cart_modifiers_pool.get_modifiers():
+            modifier.after_add(cart=self, item=item)
+
+        self.save()
+        return item
+
     def remove(
         self,
         item_id: str,

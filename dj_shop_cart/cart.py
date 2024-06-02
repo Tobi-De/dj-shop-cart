@@ -34,7 +34,11 @@ class CartItem:
     @property
     def product(self) -> DjangoModel:
         model = cast(type[DjangoModel], import_class(self.product_model_path))
-        return model.objects.get(pk=self.product_pk)
+        try:
+            return model.objects.get(pk=self.product_pk)
+        except AttributeError:
+            # this is a hack to allow to use a product that is not a django model
+            return model.get_object(pk=self.product_pk)
 
     @property
     def subtotal(self) -> Numeric:

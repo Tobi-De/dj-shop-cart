@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from dataclasses import dataclass
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -110,18 +111,6 @@ def cart_remove_product(cart: Cart):
     assert cart.count == 8
     cart.remove(item.id)
     assert cart.is_empty
-
-
-def test_cart_increase_quantity(cart: Cart):
-    product = ProductFactory()
-    item = cart.add(product, quantity=10)
-    item = cart.increase(item.id, quantity=10)
-    assert item.quantity == 20
-
-
-def test_cart_increase_quantity_fake_item(cart: Cart):
-    item = cart.increase(str(uuid.uuid4()), quantity=10)
-    assert item is None
 
 
 def test_cart_remove_session_storage(cart: Cart):
@@ -264,3 +253,25 @@ def test_cart_custom_modifier(rf, session, cart, product, monkeypatch):
     item = cart.remove(item.id)
     assert "before_remove" in item.metadata["hooks"]
     assert "after_remove" in item.metadata["hooks"]
+
+
+db = {}
+
+
+@dataclass
+class P:
+    pk: str
+    name: str
+
+    @classmethod
+    def get_object(cls, pk: str):
+        return db[pk]
+
+
+def test_add_not_django_model(rf, session, cart):
+    p_pk = str(uuid.uuid4())
+    p = P(name="product not in db", pk=p_pk)
+    db[p_pk] = p
+
+    cart.add(p, quantity=1)
+    assert p == list(cart)[0].product

@@ -1,54 +1,85 @@
-[tool.poetry]
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
 name = "dj-shop-cart"
 version = "8.0.0a1"
 description = "Simple django cart manager for your django projects."
-authors = ["Tobi DEGNON <tobidegnon@protonmail.com>"]
-license = "MIT"
 readme = "README.md"
-repository = "https://github.com/Tobi-De/dj-shop-cart"
-homepage = "https://tobi-de.github.io/dj-shop-cart/"
+requires-python = ">=3.10"
+license = "MIT"
 keywords = ["django", "python", "cart", "shop", "ecommerce"]
-packages = [
-    { include = "dj_shop_cart" },
-    { include = "dj_shop_cart/migrations" },
+authors = [
+  { name = "Tobi-De", email = "tobidegnon@proton.me" },
 ]
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Framework :: Django :: 3.0",
-    "Framework :: Django :: 3.1",
-    "Framework :: Django :: 3.2",
-    "Framework :: Django :: 4.0",
-    "Framework :: Django :: 4.1",
-    "Framework :: Django :: 4.2",
-    "Intended Audience :: Developers",
-    "Natural Language :: English",
+  "Development Status :: 5 - Production/Stable",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+  "Framework :: Django :: 3.0",
+  "Framework :: Django :: 3.1",
+  "Framework :: Django :: 3.2",
+  "Framework :: Django :: 4.0",
+  "Framework :: Django :: 4.1",
+  "Framework :: Django :: 4.2",
+  "Framework :: Django :: 5.0",
+  "Intended Audience :: Developers",
+  "Natural Language :: English",
+]
+dependencies = ["Django>=3", "attrs>=23.2.0"]
+
+[project.urls]
+Documentation = "https://github.com/Tobi-De/dj_shop_cart#readme"
+Issues = "https://github.com/Tobi-De/dj_shop_cart/issues"
+Source = "https://github.com/Tobi-De/dj_shop_cart"
+
+[tool.hatch.envs.default]
+dependencies = [
+  "pytest",
+  "pytest-django",
+  "mypy",
+  "pre-commit",
+  "django-stubs",
+  "factory-boy",
+  "ipython",
+  "redis",
+  "hiredis",
+  "pytest-pretty"
 ]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-Django = "^4.0"
-attrs = "^23.2.0"
+[tool.hatch.envs.docs]
+dependencies = [
+  "shibuya",
+  "myst-parser",
+]
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.2.1"
-pytest-django = "^4.8.0"
-mypy = "^1.10.0"
-pre-commit = "^3.7.1"
-black = "^24.4.2"
-isort = "^5.13.2"
-django-stubs = "^5.0.2"
-factory-boy = "^3.3.0"
-ipython = "^8.25.0"
-redis = "^5.0.4"
-hiredis = "^2.3.2"
-pytest-pretty = "^1.2.0"
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:dj_shop_cart tests}"
 
-[tool.black]
-target-version = ['py37']
+[tool.coverage.run]
+source_pkgs = ["dj_shop_cart", "tests"]
+branch = true
+parallel = true
 
-[tool.isort]
-profile = "black"
-add_imports = "from __future__ import annotations"
+[tool.coverage.paths]
+dj_shop_cart = ["dj_shop_cart"]
+tests = ["tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
 
 [tool.mypy]
 mypy_path = "dj_shop_cart/"
@@ -64,7 +95,3 @@ allow_untyped_defs = true
 [tool.pytest.ini_options]
 addopts = "--ds=tests.settings --reuse-db"
 python_files = ["tests.py", "test_*.py"]
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"

@@ -1,3 +1,5 @@
+# Usage
+
 ## Configuration
 
 Configure the cart behaviour in your Django settings. All settings are optional and must be strings if defined.
@@ -100,7 +102,7 @@ def my_view(request):
         print(item.subtotal)
 
     # find items based on product_pk, cart item id, variant details, quantity, etc.
-    item = cart.find_one(product_pk=1)[0]
+    item = cart.find_one(product_pk=1)
     assert item in cart
 
     # the number of items in the cart
@@ -161,31 +163,7 @@ get_cart_a = partial(Cart.new, prefix="cart_a")
 cart_a = get_cart_a(request)
 cart_a.add(product_a, quantity=10)
 ```
-### Custom Cart Class
-
-````python
-# settings.py
-CART_CLASS = "your_project.somewhere_in_your_project.Cart"
-
-# somewhere_in_your_project.py
-from dj_shop_cart.cart import CartItem, Cart as DjCart
-
-
-class Cart(DjCart):
-
-    def before_add(self, item: CartItem, quantity: int) -> None:
-        pass
-
-    def after_add(self, item: CartItem) -> None:
-        pass
-
-    def before_remove(self, item: CartItem | None = None, quantity: int | None = None) -> None:
-        pass
-
-    def after_remove(self, item: CartItem | None = None) -> None:
-        pass
-````
-The 4 methods defined in the class above are custom hooks that you can override to customize the `Add/Remove` process.
+### Cart Modifiers
 
 ### Properties of `CartItem`
 
@@ -278,3 +256,4 @@ class Storage(Protocol):
     def clear(self) -> None:
         ...
 ```
+

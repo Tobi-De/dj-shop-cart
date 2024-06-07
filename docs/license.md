@@ -1,1 +1,4 @@
-{% include-markdown "../LICENSE" %}
+# License
+
+```{include} ../LICENSE
+```

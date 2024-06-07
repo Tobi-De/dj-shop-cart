@@ -148,7 +148,7 @@ class Cart:
         Add a new item to the cart
 
         :param product: An instance of a database product
-        :param quantity: The quantity that will be added to the dj_shop_cart
+        :param quantity: The quantity that will be added to the dj_shop_cart (default to 1)
         :param variant:  Variant details of the product
         :param override_quantity: If true will overwrite the quantity of the item if it already exists
         :param metadata: Optional metadata that is attached to the item, this dictionary can contain

@@ -2,6 +2,10 @@
 _default:
     @just --list
 
+# Run tests using pytest
+@test *ARGS:
+    hatch run pytest {{ ARGS }}
+
 # Build documentation using Sphinx
 @docs-build LOCATION="docs/_build/html":
     sphinx-build docs {{ LOCATION }}

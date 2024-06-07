@@ -9,7 +9,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.contrib.sessions.backends.base import SessionBase
 from django.test import RequestFactory
 
-from dj_shop_cart.cart import CartItem, get_cart, get_cart_class
+from dj_shop_cart.cart import CartItem, get_cart, Cart
 from dj_shop_cart.modifiers import CartModifier, cart_modifiers_pool
 from dj_shop_cart.storages import DBStorage, SessionStorage
 from tests.factories import ProductFactory
@@ -19,7 +19,6 @@ from .conftest import PREFIXED_CART_KEY
 
 pytestmark = pytest.mark.django_db
 
-Cart = get_cart_class()
 User = get_user_model()
 
 
@@ -113,6 +112,22 @@ def test_cart_is_empty_session_storage(cart: Cart):
 
 def test_cart_is_empty_db_storage(cart_db):
     cart_is_empty(cart=cart_db)
+
+def test_cart_empty_clear_metadata(cart: Cart):
+    product = ProductFactory()
+    cart.add(product=product, quantity=2, metadata={"something": 1})
+    cart.update_metadata({"something": 1})
+    cart.empty(clear_metadata=True)
+    assert cart.is_empty
+    assert not cart.metadata
+
+def test_cart_empty_not_clear_metadata(cart: Cart):
+    product = ProductFactory()
+    cart.add(product=product, quantity=2, metadata={"something": 1})
+    cart.update_metadata({"something": 1})
+    cart.empty(clear_metadata=False)
+    assert cart.is_empty
+    assert cart.metadata["something"] == 1
 
 
 def cart_remove_product(cart: Cart):

@@ -12,7 +12,7 @@ Configure the cart behaviour in your Django settings. All settings are optional 
 | CART_STORAGE_BACKEND          | The path to the storage backend to use. If you define a custom storage backend, it should follow the `Storage` protocol, see the **Backend Storage section** below | `dj_shop_cart.storages.SessionStorage` |
 | CART_CACHE_TIMEOUT            | The cache timeout when using the **CartStorage** backend, default to 5 days.                                                                                       | 60 * 60 * 24 * 5                     |
 
-## API Reference
+## Examples
 
 ### Instantiate a new cart
 

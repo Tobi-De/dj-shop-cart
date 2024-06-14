@@ -47,5 +47,6 @@ html_theme_options = {
             "title": "License",
             "url": "license"
         },
-    ]
+    ],
+    "page_layout": "compact",
 }

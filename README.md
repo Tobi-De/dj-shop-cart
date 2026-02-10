@@ -109,18 +109,17 @@ This project is used by the following companies:
 
 ## Development
 
-Poetry is required (not really, you can set up the environment however you want and install the requirements
-manually) to set up a virtualenv, install it then run the following:
+uv is required to set up a virtualenv, install it then run the following:
 
 ```sh
-poetry install
-pre-commit install --install-hooks
+uv sync
+uv run pre-commit install --install-hooks
 ```
 
 Tests can then be run quickly in that environment:
 
 ```sh
-pytest
+uv run pytest
 ```
 
 ## Feedback

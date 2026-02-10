@@ -37,23 +37,23 @@ Request features on the [Issue Tracker].
 
 ## How to set up your development environment
 
-You need Python 3.8+ and the following tools:
+You need Python 3.10+ and the following tools:
 
-- [Poetry]
+- [uv]
 
 Install the package with development requirements:
 
 ```console
-$ poetry install
+$ uv sync
 ```
-[poetry]: https://python-poetry.org/
+[uv]: https://github.com/astral-sh/uv
 
 ## How to test the project
 
 Run the full test suite:
 
 ```console
-$ pytest
+$ uv run pytest
 ```
 
 Unit tests are located in the _tests_ directory,
@@ -76,7 +76,7 @@ Feel free to submit early, though—we can always iterate on this.
 To run linting and code formatting checks before committing your change, you can install pre-commit as a Git hook by running the following command:
 
 ```console
-$ pre-commit -- install
+$ uv run pre-commit -- install
 ```
 
 It is recommended to open an issue before starting work on anything.

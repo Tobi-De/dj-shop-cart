@@ -4,21 +4,16 @@ _default:
 
 # Install dependencies
 @bootstrap:
-    hatch env create
-    hatch env create docs
+    uv sync
 
 # Run tests using pytest
 @test *ARGS:
-    hatch run pytest {{ ARGS }}
+    uv run --group dev pytest {{ ARGS }}
 
 # Build documentation using Sphinx
 @docs-build LOCATION="docs/_build/html":
-    sphinx-build docs {{ LOCATION }}
-
-# Install documentation dependencies
-@docs-install:
-    hatch run docs:python --version
+	uv run --group docs sphinx-build docs {{ LOCATION }}
 
 # Serve documentation locally
 @docs-serve:
-    hatch run docs:sphinx-autobuild docs docs/_build/html --port 8001
+	uv run --group docs sphinx-autobuild docs docs/_build/html --port 8001
